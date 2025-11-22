@@ -126,12 +126,12 @@
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* GÜNCELLENDİ: Hedef Görünürlüğü */
+        /* Hedef Görünürlüğü: Parlak Beyaz ve Neon Efekt */
         .target-cell {
             height: 48px; display: flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 20px; 
-            color: #e0e0e0; /* Parlak beyazımsı renk */
-            text-shadow: 0 0 10px rgba(255,255,255,0.3); /* Hafif parlama */
+            color: #e0e0e0; /* Parlak beyaz */
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
             background: rgba(255,255,255,0.06); 
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.1);
@@ -191,7 +191,10 @@
         .dj-btn-small {
             background: #222; color: var(--neon-green); border: 1px solid #333;
             border-radius: 8px; padding: 0 16px; cursor: pointer;
+            min-width: 80px;
+            transition: all 0.3s;
         }
+        .dj-btn-small:active { transform: scale(0.95); }
 
         /* Winner Overlay */
         .overlay {
@@ -206,18 +209,19 @@
             border: 1px solid #333; border-radius: 24px; padding: 24px;
             text-align: center; box-shadow: 0 0 50px rgba(10,255,96,0.2);
             transform: scale(0.9); transition: transform 0.3s;
-            max-height: 90vh; overflow-y: auto; /* Kartın ekranı taşmasını önle */
+            max-height: 95vh; overflow-y: auto;
         }
         .overlay.show .winner-card { transform: scale(1); }
         
-        /* GÜNCELLENDİ: Gif Boyutu Dikey Uzun */
+        /* GIF AYARI: Dikey uzun, kapsayıcıya sığan, taşmayan */
         #winnerGif {
             width: 100%;
-            height: auto; /* Kendi yüksekliğini kullansın */
-            max-height: 60vh; /* Ekranın %60'ından uzun olmasın ki buton görünsün */
-            object-fit: contain; /* Görüntüyü kesmeden sığdır */
+            height: auto;
+            max-height: 60vh; /* Ekran boyunu boğmasın */
+            object-fit: contain;
             border-radius: 12px; margin-bottom: 16px; border: 2px solid #222;
             background: #000;
+            display: block;
         }
         
     </style>
@@ -264,11 +268,11 @@
                 <div id="globalScoreBoard" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;"></div>
 
                 <div class="dj-booth">
-                    <div style="font-size:12px; color:var(--neon-cyan); font-weight:700;">🎵 DJ İstek Hattı</div>
-                    <div style="font-size:10px; color:#666; margin:4px 0;">Örn: "Energetic Rock", "90lar Pop", "Tarkan"...</div>
+                    <div style="font-size:12px; color:var(--neon-cyan); font-weight:700;">🎵 AI DJ İstek Hattı</div>
+                    <div style="font-size:10px; color:#666; margin:4px 0;">Örn: "Biraz hareketli olsun", "90lar pop", "Damar"...</div>
                     <div class="dj-row">
-                        <input type="text" id="musicInput" class="dj-input" placeholder="Şarkı veya mod yaz...">
-                        <button class="dj-btn-small" onclick="findMusic()">AÇ</button>
+                        <input type="text" id="musicInput" class="dj-input" placeholder="DJ'e tarif et...">
+                        <button id="djBtn" class="dj-btn-small" onclick="smartDJ()">BUL</button>
                     </div>
                 </div>
             </div>
@@ -288,8 +292,8 @@
         // -- CONFIG --
         const targets = ['20','19','18','17','16','15','D','T','B','H'];
         let playerCount = 2;
-        let players = []; // { name: "X", scores: [0,0...] }
-        let globalWins = {}; // { "Name": 5 }
+        let players = [];
+        let globalWins = {};
         let isGameActive = false;
 
         // -- INIT --
@@ -313,10 +317,7 @@
             players = [];
             for(let i=0; i<playerCount; i++) {
                 const name = document.getElementById(`pName${i}`).value.trim() || `P${i+1}`;
-                players.push({
-                    name: name,
-                    scores: new Array(targets.length).fill(0)
-                });
+                players.push({ name: name, scores: new Array(targets.length).fill(0) });
                 if(!globalWins[name]) globalWins[name] = 0;
             }
 
@@ -330,19 +331,11 @@
         // -- CORE LOGIC --
         window.handleHit = function(pIdx, tIdx) {
             if(!isGameActive) return;
-
             let current = players[pIdx].scores[tIdx];
-            
-            // Cycle: 0 -> 1 -> 2 -> 3 -> 0 (düzeltme imkanı için)
             if(current >= 3) players[pIdx].scores[tIdx] = 0;
             else players[pIdx].scores[tIdx]++;
-
             renderBoard();
-
-            // Check Win (Sadece 3'e ulaştığında kontrol et)
-            if(players[pIdx].scores[tIdx] === 3) {
-                checkWin(pIdx);
-            }
+            if(players[pIdx].scores[tIdx] === 3) checkWin(pIdx);
         };
 
         function checkWin(pIdx) {
@@ -350,14 +343,9 @@
             if(isWinner) {
                 isGameActive = false;
                 globalWins[players[pIdx].name]++;
-                
-                // Show Overlay
                 document.getElementById('winnerName').innerText = players[pIdx].name + " KAZANDI!";
-                
-                // Gif Reload Hack
                 const img = document.getElementById('winnerGif');
-                const src = img.src; img.src = ''; img.src = src;
-
+                const src = img.src; img.src = ''; img.src = src; // Reload GIF
                 document.getElementById('winOverlay').classList.add('show');
                 updateStatus(players[pIdx].name);
             }
@@ -377,35 +365,24 @@
             let html = '';
 
             if(playerCount === 2) {
-                // Class for 2 cols
                 board.className = 'panel board-grid grid-2p';
-                // Header (GÜNCELLENDİ: HDF yazısı kaldırıldı)
                 html += `<div class="col-header">${players[0].name}</div>`;
-                html += `<div class="col-header"></div>`; 
+                html += `<div class="col-header"></div>`; // HDF Yazısı kaldırıldı
                 html += `<div class="col-header">${players[1].name}</div>`;
-                
-                // Rows
                 targets.forEach((t, tIdx) => {
                     html += getCellHtml(0, tIdx);
                     html += `<div class="target-cell">${t}</div>`;
                     html += getCellHtml(1, tIdx);
                 });
             } else {
-                // Class for 3 cols
                 board.className = 'panel board-grid grid-3p';
-                // Header
                 html += `<div class="col-header"></div>`;
                 players.forEach(p => html += `<div class="col-header">${p.name}</div>`);
-
-                // Rows
                 targets.forEach((t, tIdx) => {
                     html += `<div class="target-cell">${t}</div>`;
-                    players.forEach((p, pIdx) => {
-                        html += getCellHtml(pIdx, tIdx);
-                    });
+                    players.forEach((p, pIdx) => html += getCellHtml(pIdx, tIdx));
                 });
             }
-
             board.innerHTML = html;
         }
 
@@ -415,7 +392,6 @@
             if(score === 1) cls += ' hit-1';
             if(score === 2) cls += ' hit-2';
             if(score === 3) cls += ' hit-3';
-
             return `<div class="${cls}" onclick="window.handleHit(${pIdx}, ${tIdx})"><div class="mark"></div></div>`;
         }
 
@@ -430,23 +406,84 @@
                 st.innerHTML = 'Oyun devam ediyor...';
                 st.className = 'status-text';
             }
-
-            // Global Scores
             let gsHtml = '';
             for(let name in globalWins) {
-                if(globalWins[name] > 0) {
-                    gsHtml += `<div style="border:1px solid #bc13fe; color:#bc13fe; font-size:11px; padding:4px 8px; border-radius:6px;">${name}: ${globalWins[name]} Win</div>`;
-                }
+                if(globalWins[name] > 0) gsHtml += `<div style="border:1px solid #bc13fe; color:#bc13fe; font-size:11px; padding:4px 8px; border-radius:6px;">${name}: ${globalWins[name]} Win</div>`;
             }
             gs.innerHTML = gsHtml;
         }
 
-        // -- MUSIC LOGIC --
-        window.findMusic = function() {
-            const query = document.getElementById('musicInput').value.trim();
+        // -- SMART DJ LOGIC (Sanal Zeka) --
+        window.smartDJ = function() {
+            const inputEl = document.getElementById('musicInput');
+            const btnEl = document.getElementById('djBtn');
+            const query = inputEl.value.toLowerCase().trim();
+
             if(!query) return;
-            const url = `https://open.spotify.com/search/${encodeURIComponent(query)}`;
-            window.open(url, '_blank');
+
+            // 1. Thinking Effect (Yapay zeka düşünüyormuş gibi)
+            const originalBtnText = btnEl.innerText;
+            btnEl.innerText = "Analiz...";
+            btnEl.style.color = "#00f3ff";
+            inputEl.disabled = true;
+
+            setTimeout(() => {
+                // 2. Keyword Matching (Akıllı eşleşme motoru)
+                let finalQuery = query;
+                let type = "search"; // search vs playlist
+
+                // "Sözlük" Mantığı
+                if(query.includes('hareketli') || query.includes('party') || query.includes('kopmalık')) {
+                    finalQuery = "Party Hits";
+                    type = "playlist";
+                } 
+                else if(query.includes('sakin') || query.includes('chill') || query.includes('yavaş')) {
+                    finalQuery = "Chill Hits";
+                    type = "playlist";
+                }
+                else if(query.includes('90lar') || query.includes('90s') || query.includes('eski')) {
+                    finalQuery = "90s Türkçe Pop";
+                    type = "playlist";
+                }
+                else if(query.includes('damar') || query.includes('arabesk') || query.includes('üzgün')) {
+                    finalQuery = "Arabesk Damar";
+                    type = "playlist";
+                }
+                else if(query.includes('rock') || query.includes('metal')) {
+                    finalQuery = "Rock Classics";
+                    type = "playlist";
+                }
+                else if(query.includes('pop') && query.includes('türkçe')) {
+                    finalQuery = "Türkçe Pop";
+                    type = "playlist";
+                }
+
+                // 3. Construct Smart URL
+                // "playlist" modundaysa, Spotify'da "X playlistleri" şeklinde aratmak daha iyi sonuç verir.
+                let spotifyUrl = "";
+                
+                if(type === "playlist") {
+                    // Kullanıcı vibe tarifi yaptı, direkt o vibe'ın playlistlerine götür
+                    spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(finalQuery)}/playlists`;
+                } else {
+                    // Direkt sanatçı veya şarkı adı olabilir
+                    spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(finalQuery)}`;
+                }
+
+                // 4. Reset UI and Open
+                window.open(spotifyUrl, '_blank');
+                
+                btnEl.innerText = "BULDUM";
+                btnEl.style.color = "#0aff60"; // Yeşil onayı
+
+                setTimeout(() => {
+                    btnEl.innerText = originalBtnText;
+                    btnEl.style.color = "";
+                    inputEl.disabled = false;
+                    inputEl.value = ""; // Clear
+                }, 2000);
+
+            }, 1200); // 1.2 saniye düşünme payı
         };
 
         init();
