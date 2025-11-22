@@ -1,1258 +1,961 @@
 <!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Dart Cricket Skor</title>
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dart Cricket Live Board</title>
     <style>
-      :root {
-        --bg-main: radial-gradient(circle at 0% -20%, #020617 0, #020617 40%, #020617 80%);
-        --card-bg: radial-gradient(circle at 0% 0%, #0f172a 0, #020617 55%, #000000 100%);
-        --card-border: rgba(148, 163, 184, 0.4);
-        --accent: #38bdf8;
-        --accent-soft: rgba(56, 189, 248, 0.2);
-        --accent-neon: #22d3ee;
-        --text-main: #e5e7eb;
-        --text-muted: #9ca3af;
-      }
+        :root {
+            --bg-dark: #0b0c15;
+            --bg-panel: #161824;
+            --neon-cyan: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-green: #0aff60;
+            --neon-red: #ff2a6d;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, system-ui, "SF Pro Text",
-          "Segoe UI", sans-serif;
-        -webkit-tap-highlight-color: transparent;
-      }
-
-      body {
-        min-height: 100vh;
-        background:
-          radial-gradient(circle at 0% 0%, #0f172a 0, transparent 50%),
-          radial-gradient(circle at 100% 0%, #4c1d95 0, transparent 55%),
-          radial-gradient(circle at 50% 100%, #0f766e 0, transparent 60%),
-          #020617;
-        color: var(--text-main);
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 16px;
-      }
-
-      .app-shell {
-        width: 100%;
-        max-width: 520px;
-        margin-top: 8px;
-        position: relative;
-      }
-
-      .app-shell::before {
-        content: "";
-        position: absolute;
-        inset: -60px;
-        pointer-events: none;
-        background:
-          radial-gradient(circle at 10% 0%, rgba(59, 130, 246, 0.35) 0, transparent 55%),
-          radial-gradient(circle at 90% 0%, rgba(236, 72, 153, 0.4) 0, transparent 55%),
-          radial-gradient(circle at 0% 100%, rgba(16, 185, 129, 0.35) 0, transparent 55%);
-        mix-blend-mode: screen;
-        opacity: 0.8;
-        filter: blur(2px);
-      }
-
-      .grain {
-        position: absolute;
-        inset: -40px;
-        pointer-events: none;
-        opacity: 0.18;
-        mix-blend-mode: soft-light;
-        background-image:
-          linear-gradient(120deg, rgba(15, 23, 42, 0.6) 0.5px, transparent 0.5px),
-          linear-gradient(60deg, rgba(148, 163, 184, 0.4) 0.5px, transparent 0.5px);
-        background-size: 3px 5px, 4px 7px;
-      }
-
-      .status-pill {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 10px;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.8);
-        border: 1px solid rgba(148, 163, 184, 0.7);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
-        margin-bottom: 8px;
-        font-size: 11px;
-        color: var(--text-muted);
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 0.9),
-          0 0 25px rgba(59, 130, 246, 0.5);
-      }
-
-      .status-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 999px;
-        background: #22c55e;
-        box-shadow:
-          0 0 0 4px rgba(34, 197, 94, 0.3),
-          0 0 14px rgba(34, 197, 94, 0.9);
-      }
-
-      .card {
-        position: relative;
-        width: 100%;
-        background: var(--card-bg);
-        border-radius: 24px;
-        padding: 18px 14px 20px;
-        border: 1px solid var(--card-border);
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 0.9),
-          0 25px 60px rgba(15, 23, 42, 0.9),
-          0 0 55px rgba(56, 189, 248, 0.28);
-        overflow: hidden;
-      }
-
-      .card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(circle at 0% 0%, rgba(148, 163, 184, 0.18) 0, transparent 60%),
-          radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.2) 0, transparent 70%);
-        opacity: 0.7;
-        pointer-events: none;
-      }
-
-      .card-inner {
-        position: relative;
-        z-index: 1;
-      }
-
-      .header {
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-      }
-
-      .title-wrap {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-
-      .title {
-        font-size: 20px;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-      }
-
-      .subtitle {
-        font-size: 12px;
-        color: var(--text-muted);
-      }
-
-      .badge {
-        padding: 4px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(59, 130, 246, 0.8);
-        font-size: 11px;
-        color: #dbeafe;
-        background:
-          radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.8) 0, rgba(56, 189, 248, 0.3) 45%, transparent 80%);
-        box-shadow:
-          0 0 22px rgba(56, 189, 248, 0.7),
-          0 0 0 1px rgba(15, 23, 42, 0.9);
-      }
-
-      /* Dynamic Island / Spotify */
-      .dynamic-island {
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: center;
-      }
-
-      .dynamic-island-inner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        min-width: 0;
-        width: 100%;
-        max-width: 380px;
-        padding: 8px 14px;
-        border-radius: 18px;
-        background:
-          radial-gradient(circle at 0% 0%, #020617 0, #020617 40%, #111827 100%);
-        border: 1px solid rgba(15, 23, 42, 0.9);
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 0.9),
-          0 18px 40px rgba(15, 23, 42, 0.95),
-          0 0 28px rgba(56, 189, 248, 0.55);
-        text-decoration: none;
-        color: #e5e7eb;
-        cursor: pointer;
-        overflow: hidden;
-        position: relative;
-      }
-
-      .dynamic-island-inner::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background:
-          linear-gradient(120deg, rgba(148, 163, 184, 0.3) 0.5px, transparent 0.5px),
-          linear-gradient(60deg, rgba(15, 23, 42, 0.4) 0.5px, transparent 0.5px);
-        background-size: 4px 6px, 3px 5px;
-        mix-blend-mode: soft-light;
-        opacity: 0.6;
-        pointer-events: none;
-      }
-
-      .dynamic-island-inner:hover {
-        filter: brightness(1.05);
-      }
-
-      .di-left {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        font-size: 11px;
-        position: relative;
-        z-index: 1;
-      }
-
-      .di-left-main {
-        font-size: 13px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .di-left-sub {
-        color: #9ca3af;
-      }
-
-      .di-right {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 11px;
-        padding: 4px 10px;
-        border-radius: 999px;
-        background:
-          radial-gradient(circle at 0% 0%, #22c55e 0, #16a34a 60%, #166534 100%);
-        color: #ecfdf5;
-        font-weight: 600;
-        white-space: nowrap;
-        position: relative;
-        z-index: 1;
-        box-shadow:
-          0 0 0 1px rgba(6, 95, 39, 0.9),
-          0 0 18px rgba(34, 197, 94, 0.8);
-      }
-
-      .di-dot {
-        width: 14px;
-        height: 14px;
-        border-radius: 999px;
-        background: radial-gradient(circle at 30% 30%, #22c55e, #16a34a);
-        box-shadow:
-          0 0 0 4px rgba(22, 163, 74, 0.4),
-          0 0 18px rgba(34, 197, 94, 0.9);
-        position: relative;
-      }
-
-      .di-dot::after {
-        content: "";
-        position: absolute;
-        inset: 3px;
-        border-radius: inherit;
-        border: 2px solid rgba(0, 0, 0, 0.7);
-      }
-
-      .section {
-        margin-top: 10px;
-      }
-
-      .controls {
-        padding: 10px;
-        border-radius: 16px;
-        background:
-          radial-gradient(circle at 0% 0%, #111827 0, #020617 60%);
-        border: 1px solid rgba(148, 163, 184, 0.6);
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 0.9),
-          0 16px 35px rgba(15, 23, 42, 0.85);
-      }
-
-      .controls-row {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 8px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-
-      label {
-        font-size: 12px;
-        color: var(--text-muted);
-      }
-
-      select,
-      input[type="text"],
-      button,
-      textarea {
-        border-radius: 12px;
-        border: none;
-        padding: 9px 11px;
-        font-size: 13px;
-      }
-
-      select,
-      input[type="text"],
-      textarea {
-        background: rgba(15, 23, 42, 0.95);
-        color: #e5e7eb;
-        border: 1px solid rgba(55, 65, 81, 0.9);
-        flex: 1;
-        min-width: 0;
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 1),
-          0 0 20px rgba(56, 189, 248, 0.18);
-      }
-
-      textarea {
-        resize: vertical;
-        min-height: 54px;
-      }
-
-      input::placeholder,
-      textarea::placeholder {
-        color: #6b7280;
-      }
-
-      .btn-row {
-        display: flex;
-        gap: 8px;
-        width: 100%;
-        margin-top: 4px;
-      }
-
-      .btn-primary {
-        background:
-          radial-gradient(circle at 0% 0%, #38bdf8, #0ea5e9 35%, #22d3ee 80%),
-          linear-gradient(135deg, #0ea5e9, #22d3ee);
-        color: #ecfeff;
-        font-weight: 600;
-        cursor: pointer;
-        flex: 1;
-        min-width: 130px;
-        box-shadow:
-          0 10px 28px rgba(56, 189, 248, 0.7),
-          0 0 25px rgba(56, 189, 248, 0.9),
-          0 0 0 1px rgba(15, 23, 42, 1);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .btn-primary::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image:
-          linear-gradient(120deg, rgba(191, 219, 254, 0.45) 0.5px, transparent 0.5px),
-          linear-gradient(60deg, rgba(15, 23, 42, 0.3) 0.5px, transparent 0.5px);
-        background-size: 4px 6px, 3px 5px;
-        mix-blend-mode: soft-light;
-        opacity: 0.8;
-        pointer-events: none;
-      }
-
-      .btn-secondary {
-        background:
-          radial-gradient(circle at 0% 0%, #1d283a, #020617 50%, #0f172a 100%);
-        color: #e5e7eb;
-        cursor: pointer;
-        font-size: 12px;
-        border: 1px solid rgba(148, 163, 184, 0.7);
-        min-width: 110px;
-        font-weight: 500;
-        position: relative;
-        overflow: hidden;
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 1),
-          0 0 20px rgba(148, 163, 184, 0.4);
-      }
-
-      .btn-secondary::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image:
-          linear-gradient(120deg, rgba(148, 163, 184, 0.35) 0.5px, transparent 0.5px),
-          linear-gradient(60deg, rgba(15, 23, 42, 0.35) 0.5px, transparent 0.5px);
-        background-size: 4px 6px, 3px 5px;
-        mix-blend-mode: soft-light;
-        opacity: 0.75;
-        pointer-events: none;
-      }
-
-      .btn-primary:active,
-      .btn-secondary:active {
-        opacity: 0.96;
-        box-shadow: none;
-        transform: translateY(1px);
-      }
-
-      .top-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 10px;
-      }
-
-      .back-btn {
-        border-radius: 999px;
-        border: 1px solid rgba(55, 65, 81, 0.9);
-        background: rgba(15, 23, 42, 0.95);
-        padding: 6px 10px;
-        font-size: 12px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
-        color: #e5e7eb;
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 1),
-          0 10px 22px rgba(15, 23, 42, 0.9);
-      }
-
-      .back-btn span {
-        font-size: 16px;
-      }
-
-      .screen {
-        display: none;
-      }
-
-      .screen.active {
-        display: block;
-      }
-
-      .scoreboard-wrapper {
-        margin-top: 4px;
-        border-radius: 18px;
-        overflow: hidden;
-        border: 1px solid rgba(75, 85, 99, 0.9);
-        background:
-          radial-gradient(circle at 0% 0%, #020617 0, #020617 50%, #020617 100%);
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 1),
-          0 18px 40px rgba(15, 23, 42, 0.95);
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-      }
-
-      thead {
-        background:
-          linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 64, 175, 0.9));
-      }
-
-      th,
-      td {
-        padding: 10px 4px;
-        text-align: center;
-        font-size: 14px;
-        color: #e5e7eb;
-      }
-
-      th:first-child,
-      td:first-child {
-        text-align: left;
-        padding-left: 12px;
-      }
-
-      th {
-        font-weight: 500;
-        border-bottom: 1px solid rgba(55, 65, 81, 0.9);
-        color: #cbd5f5;
-      }
-
-      tbody tr:nth-child(odd) {
-        background: rgba(15, 23, 42, 0.95);
-      }
-
-      tbody tr:nth-child(even) {
-        background: rgba(15, 23, 42, 0.9);
-      }
-
-      td.cell-clickable {
-        cursor: pointer;
-        user-select: none;
-        font-weight: 700;
-        font-size: 20px;
-        min-height: 40px;
-        transition: background 0.12s ease-out, transform 0.06s ease-out,
-          box-shadow 0.12s ease-out;
-      }
-
-      td.cell-clickable.tap {
-        background: rgba(56, 189, 248, 0.15);
-        box-shadow:
-          inset 0 0 0 1px rgba(56, 189, 248, 0.65),
-          0 0 18px rgba(56, 189, 248, 0.8);
-      }
-
-      .summary {
-        margin-top: 10px;
-        padding: 10px 11px;
-        border-radius: 14px;
-        background:
-          radial-gradient(circle at 0% 0%, rgba(15, 23, 42, 0.95) 0, #020617 60%);
-        border: 1px solid rgba(75, 85, 99, 0.95);
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 1),
-          0 16px 32px rgba(15, 23, 42, 0.9);
-      }
-
-      .summary-title {
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--accent-neon);
-        margin-bottom: 6px;
-        letter-spacing: 0.03em;
-        text-transform: uppercase;
-      }
-
-      .game-status {
-        font-size: 13px;
-        margin-bottom: 6px;
-      }
-
-      .score-summary {
-        font-size: 12px;
-        color: var(--text-muted);
-      }
-
-      .score-summary span {
-        display: inline-block;
-        margin-right: 10px;
-        margin-bottom: 2px;
-      }
-
-      .score-summary strong {
-        color: var(--accent-neon);
-      }
-
-      .round-title {
-        font-size: 11px;
-        font-weight: 600;
-        color: #a5b4fc;
-        margin-top: 8px;
-        margin-bottom: 4px;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-      }
-
-      .game-status.win {
-        color: #22c55e;
-      }
-
-      .game-status.tie {
-        color: #fbbf24;
-      }
-
-      .game-status.running {
-        color: var(--text-muted);
-      }
-
-      /* Winner overlay (GIF) */
-      .winner-overlay {
-        position: fixed;
-        inset: 0;
-        background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.28), rgba(15, 23, 42, 0.9));
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-      }
-
-      .winner-overlay.active {
-        display: flex;
-      }
-
-      .winner-inner {
-        background:
-          radial-gradient(circle at 0% 0%, rgba(15, 23, 42, 1) 0, #020617 60%);
-        border-radius: 24px;
-        padding: 14px 14px 16px;
-        max-width: 320px;
-        width: 90%;
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 1),
-          0 26px 55px rgba(15, 23, 42, 0.95),
-          0 0 40px rgba(56, 189, 248, 0.8);
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .winner-inner::before {
-        content: "";
-        position: absolute;
-        inset: -40%;
-        background:
-          radial-gradient(circle at 0% 0%, rgba(129, 140, 248, 0.45) 0, transparent 50%),
-          radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.4) 0, transparent 55%);
-        mix-blend-mode: screen;
-        opacity: 0.9;
-        pointer-events: none;
-      }
-
-      .winner-gif-wrap {
-        border-radius: 18px;
-        overflow: hidden;
-        margin-bottom: 10px;
-        position: relative;
-        z-index: 1;
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 0.9),
-          0 0 30px rgba(56, 189, 248, 0.8);
-      }
-
-      .winner-gif-wrap img {
-        display: block;
-        width: 100%;
-        height: auto;
-      }
-
-      .winner-text {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #e5e7eb;
-        position: relative;
-        z-index: 1;
-      }
-
-      .winner-sub {
-        font-size: 12px;
-        color: #9ca3af;
-        margin-bottom: 10px;
-        position: relative;
-        z-index: 1;
-      }
-
-      .btn-small {
-        font-size: 12px;
-        padding: 7px 10px;
-        min-width: 0;
-      }
-
-      /* Şarkı istek kutusu */
-      .music-box {
-        margin-top: 12px;
-        padding: 10px;
-        border-radius: 14px;
-        background:
-          radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.16), rgba(15, 23, 42, 0.95));
-        border: 1px solid rgba(56, 189, 248, 0.7);
-        box-shadow:
-          0 0 0 1px rgba(15, 23, 42, 1),
-          0 16px 32px rgba(15, 23, 42, 0.9),
-          0 0 30px rgba(56, 189, 248, 0.6);
-      }
-
-      .music-title {
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--accent-neon);
-        margin-bottom: 6px;
-        letter-spacing: 0.03em;
-        text-transform: uppercase;
-      }
-
-      .music-hint {
-        font-size: 11px;
-        color: #9ca3af;
-        margin-bottom: 6px;
-      }
-
-      @media (max-width: 430px) {
         body {
-          padding: 10px;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-stack);
+            overflow-x: hidden;
+            padding-bottom: 40px; /* Space for bottom scroll */
         }
 
-        .card {
-          padding: 14px 12px 18px;
+        /* Background Ambience */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: -20%;
+            width: 140%;
+            height: 140%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(188, 19, 254, 0.15), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(0, 243, 255, 0.1), transparent 40%);
+            z-index: -1;
+            pointer-events: none;
         }
 
-        th,
-        td {
-          font-size: 13px;
-          padding: 8px 3px;
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
         }
 
-        td.cell-clickable {
-          font-size: 18px;
-          min-height: 36px;
+        /* Dynamic Island */
+        .dynamic-island-wrapper {
+            position: fixed;
+            top: 12px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
         }
 
-        .title {
-          font-size: 18px;
+        .dynamic-island {
+            background: #000;
+            width: 92%;
+            max-width: 360px;
+            height: 48px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6px 0 16px;
+            box-shadow: 
+                0 4px 12px rgba(0,0,0,0.5),
+                inset 0 0 0 1px rgba(255,255,255,0.15);
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
 
-        .dynamic-island-inner {
-          max-width: 100%;
+        .dynamic-island:active {
+            transform: scale(0.98);
         }
-      }
+
+        .di-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .equalizer {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 14px;
+        }
+
+        .bar {
+            width: 3px;
+            background-color: var(--neon-green);
+            border-radius: 2px;
+            animation: bounce 1s infinite ease-in-out;
+        }
+
+        .bar:nth-child(2) { animation-delay: 0.2s; height: 60%; }
+        .bar:nth-child(3) { animation-delay: 0.4s; height: 40%; }
+
+        @keyframes bounce {
+            0%, 100% { height: 4px; }
+            50% { height: 14px; }
+        }
+
+        .di-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .di-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .di-desc {
+            font-size: 10px;
+            color: var(--text-muted);
+            line-height: 1.1;
+        }
+
+        .di-btn {
+            background: #1c1c1e;
+            color: var(--neon-green);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .playing-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--neon-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--neon-green);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 600px;
+            margin: 80px auto 0;
+            padding: 0 16px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(165, 180, 252, 0.3);
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--neon-cyan);
+            opacity: 0.8;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Player Setup */
+        .setup-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--neon-cyan), #0099ff);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 243, 255, 0.3);
+            transition: transform 0.1s, filter 0.2s;
+            width: 100%;
+        }
+        
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:hover { filter: brightness(1.1); }
+
+        .player-select {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .p-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .p-btn.active {
+            background: var(--neon-purple);
+            color: white;
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
+        }
+
+        /* Game Board */
+        .game-board {
+            display: none; /* Hidden until start */
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 16px;
+            box-shadow: 
+                0 20px 50px rgba(0,0,0,0.5),
+                inset 0 0 0 1px rgba(255,255,255,0.05);
+            margin-bottom: 24px;
+        }
+
+        .board-grid {
+            display: grid;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* 2 Player Layout */
+        .grid-2p {
+            grid-template-columns: 1fr 50px 1fr;
+        }
+        /* 3 Player Layout */
+        .grid-3p {
+            grid-template-columns: 45px 1fr 1fr 1fr;
+        }
+
+        .header-cell {
+            text-align: center;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            padding-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .target-cell {
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: var(--text-muted);
+            font-size: 18px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .score-cell {
+            height: 44px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease-out;
+        }
+
+        .score-cell:active {
+            transform: scale(0.92);
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* Hit Indicators */
+        .mark {
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Hit 1: Single Slash */
+        .hit-1 {
+            border-color: rgba(0, 243, 255, 0.3);
+            background: rgba(0, 243, 255, 0.05);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1) inset;
+        }
+        .hit-1 .mark {
+            width: 4px;
+            height: 24px;
+            background: var(--neon-cyan);
+            transform: rotate(45deg);
+            border-radius: 2px;
+            box-shadow: 0 0 8px var(--neon-cyan);
+        }
+
+        /* Hit 2: Cross */
+        .hit-2 {
+            border-color: rgba(188, 19, 254, 0.3);
+            background: rgba(188, 19, 254, 0.05);
+            box-shadow: 0 0 10px rgba(188, 19, 254, 0.1) inset;
+        }
+        .hit-2 .mark {
+            position: relative;
+            width: 24px; height: 24px;
+        }
+        .hit-2 .mark::before, .hit-2 .mark::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 10px;
+            width: 4px; height: 24px;
+            background: var(--neon-purple);
+            border-radius: 2px;
+            box-shadow: 0 0 8px var(--neon-purple);
+        }
+        .hit-2 .mark::before { transform: rotate(45deg); }
+        .hit-2 .mark::after { transform: rotate(-45deg); }
+
+        /* Hit 3: Closed (Circle X) */
+        .hit-3 {
+            border-color: var(--neon-green);
+            background: rgba(10, 255, 96, 0.1);
+            box-shadow: inset 0 0 15px rgba(10, 255, 96, 0.2);
+        }
+        .hit-3 .mark {
+            width: 28px; height: 28px;
+            border: 2px solid var(--neon-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-green);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hit-3 .mark::after {
+            content: '×';
+            color: var(--neon-green);
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 0 5px var(--neon-green);
+        }
+
+        /* Summary Panel */
+        .summary-panel {
+            background: var(--bg-panel);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border-top: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            display: none; /* Hidden until start */
+        }
+
+        .summary-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+        }
+
+        .status-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .game-status-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .status-running { color: var(--text-muted); }
+        .status-win { color: var(--neon-green); text-shadow: 0 0 10px rgba(10,255,96,0.4); }
+
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .stat-pill {
+            background: rgba(255,255,255,0.05);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-pill strong { color: #fff; }
+        .stat-pill span { color: var(--text-muted); }
+
+        /* Global Score Section */
+        .global-score-area {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 16px;
+        }
+        .gs-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .gs-tag {
+            border: 1px solid var(--neon-purple);
+            color: var(--neon-purple);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            box-shadow: 0 0 8px rgba(188,19,254,0.2);
+        }
+
+        /* DJ Section */
+        .dj-booth {
+            background: linear-gradient(to bottom, #1a1c29, #11121a);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--glass-border);
+            margin-top: 10px;
+        }
+        .dj-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .dj-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-style: italic;
+        }
+        .dj-input-row {
+            display: flex;
+            gap: 8px;
+        }
+        .dj-input {
+            flex: 1;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            padding: 8px;
+            font-size: 13px;
+            resize: none;
+            height: 40px;
+            font-family: inherit;
+        }
+        .dj-input:focus { border-color: var(--neon-cyan); outline: none; }
+        
+        .dj-btn {
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 0 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .dj-btn:hover { border-color: var(--neon-green); color: var(--neon-green); }
+
+        /* Winner Overlay */
+        .winner-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 10, 0.85);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .winner-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .winner-card {
+            background: #161824;
+            width: 90%;
+            max-width: 340px;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 60px rgba(0, 243, 255, 0.15);
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .winner-overlay.show .winner-card {
+            transform: scale(1);
+        }
+
+        .gif-container {
+            width: 100%;
+            height: 180px;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 2px solid #222;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        #winnerGif {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .winner-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            margin: 0 0 8px 0;
+        }
+
+        .winner-name {
+            color: var(--neon-green);
+            text-transform: uppercase;
+        }
+
+        .winner-sub {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
     </style>
-  </head>
-  <body>
-    <div class="app-shell">
-      <div class="grain"></div>
-      <div class="status-pill">
-        <div class="status-dot"></div>
-        <span>Dart Cricket · canlı skor tahtası</span>
-      </div>
+</head>
+<body>
 
-      <!-- Kazanan GIF overlay -->
-      <div id="winnerOverlay" class="winner-overlay">
-        <div class="winner-inner">
-          <div class="winner-gif-wrap">
-            <img
-              id="winnerGif"
-              src="winner.gif"
-              alt="Kazanan"
-            />
-          </div>
-          <div id="winnerText" class="winner-text"></div>
-          <div class="winner-sub">Yeni tur için işaretleri temizle.</div>
-          <button id="closeOverlayBtn" class="btn-primary btn-small">
-            Tamam
-          </button>
+    <div class="dynamic-island-wrapper">
+        <div class="dynamic-island" onclick="openSpotifyPlaylist()">
+            <div class="di-left">
+                <div class="playing-dot"></div>
+                <div class="equalizer">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="di-info">
+                    <div class="di-title">Dart Zone Mix</div>
+                    <div class="di-desc">High Energy Playlist</div>
+                </div>
+            </div>
+            <div class="di-btn">
+                Spotify <span style="font-size: 10px">▸</span>
+            </div>
         </div>
-      </div>
+    </div>
 
-      <div class="card">
-        <div class="card-inner">
-          <!-- Dynamic Island / Spotify playlist -->
-          <div class="dynamic-island">
-            <a
-              class="dynamic-island-inner"
-              href="https://open.spotify.com/playlist/37i9dQZF1EJzGcYgpaOt8a?si=4ad5383ce6fd48a0"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div class="di-left">
-                <div class="di-left-main">
-                  <span class="di-dot"></span>
-                  <span>🎧 Dart mode playlist</span>
-                </div>
-                <div class="di-left-sub">
-                  Okları hazırlarken aç, herkes ısınsın
-                </div>
-              </div>
-              <div class="di-right">
-                <span>Spotify aç</span>
-                <span>▸</span>
-              </div>
-            </a>
-          </div>
+    <div class="container">
+        <header>
+            <h1>Dart Cricket Live</h1>
+            <div class="subtitle">Night Mode · Up to 3 Players</div>
+        </header>
 
-          <!-- SETUP EKRANI -->
-          <div id="setupScreen" class="screen active">
-            <div class="header">
-              <div class="title-wrap">
-                <div class="title">Dart Cricket Skor</div>
-                <div class="subtitle">
-                  Oyuncuları seç ve başlat
-                </div>
-              </div>
-              <div class="badge">3 oyuncuya kadar</div>
+        <div id="setupPanel" class="setup-panel">
+            <div class="player-select">
+                <button class="p-btn" onclick="setPlayerCount(2)">2 OYUNCU</button>
+                <button class="p-btn" onclick="setPlayerCount(3)">3 OYUNCU</button>
             </div>
-
-            <div class="section controls">
-              <div class="controls-row">
-                <label for="playerCount">Oyuncu sayısı:</label>
-                <select id="playerCount">
-                  <option value="1">1 oyuncu</option>
-                  <option value="2" selected>2 oyuncu</option>
-                  <option value="3">3 oyuncu</option>
-                </select>
-              </div>
-              <div class="controls-row">
-                <input
-                  type="text"
-                  id="player1"
-                  placeholder="Oyuncu 1"
-                  value="Oyuncu 1"
-                />
-              </div>
-              <div class="controls-row">
-                <input
-                  type="text"
-                  id="player2"
-                  placeholder="Oyuncu 2"
-                  value="Oyuncu 2"
-                />
-              </div>
-              <div class="controls-row">
-                <input
-                  type="text"
-                  id="player3"
-                  placeholder="Oyuncu 3"
-                  value="Oyuncu 3"
-                />
-              </div>
-              <div class="btn-row">
-                <button class="btn-primary" id="startBtn">
-                  Oyunu Başlat
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- OYUN EKRANI -->
-          <div id="gameScreen" class="screen">
-            <div class="top-bar">
-              <button id="backBtn" class="back-btn">
-                <span>‹</span> Oyuncular
-              </button>
-              <div class="subtitle">Skor tahtası</div>
-            </div>
-
-            <div class="section">
-              <div class="scoreboard-wrapper">
-                <table id="scoreTable"></table>
-              </div>
-
-              <div class="summary">
-                <div class="summary-title">Anlık Durum</div>
-                <div id="gameStatus" class="game-status running">
-                  Oyun devam ediyor
-                </div>
-                <div id="scoreSummary" class="score-summary">
-                  Henüz kapatılmış hedef yok.
+            
+            <div id="nameInputs">
                 </div>
 
-                <div class="round-title">Genel Puanlama</div>
-                <div id="globalSummary" class="score-summary">
-                  Henüz kimse oyun kazanmadı.
-                </div>
-
-                <!-- Şarkı istek kutusu -->
-                <div class="music-box">
-                  <div class="music-title">Şarkı iste</div>
-                  <div class="music-hint">
-                    Nasıl bir şarkı istiyorsun? Mesela
-                    "enerjik rock", "sakin jazz", "80ler pop", "romantik slow" gibi yaz.
-                  </div>
-                  <textarea
-                    id="songRequest"
-                    placeholder="Örnek: enerjik modern rock, kadın vokal, tempo yüksek"
-                  ></textarea>
-                  <div class="btn-row" style="margin-top: 6px;">
-                    <button class="btn-secondary" id="songRequestBtn">
-                      Spotifyda bul
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="btn-row" style="margin-top: 8px;">
-                <button class="btn-secondary" id="resetMarksBtn">
-                  İşaretleri temizle
-                </button>
-                <button class="btn-primary" id="newGameBtn">
-                  Yeni oyun
-                </button>
-              </div>
-            </div>
-          </div>
+            <button class="btn-primary" onclick="startGame()">OYUNU BAŞLAT</button>
         </div>
-      </div>
+
+        <div id="gameBoard" class="game-board">
+            <div id="gridContainer" class="board-grid">
+                </div>
+        </div>
+
+        <div id="summaryPanel" class="summary-panel">
+            <span class="status-label">Oyun Durumu</span>
+            <div id="gameStatusText" class="game-status-text status-running">Oyun devam ediyor...</div>
+            
+            <span class="status-label">Hedefler</span>
+            <div id="targetStats" class="stats-grid">
+                </div>
+
+            <div class="global-score-area">
+                <span class="status-label" style="margin-bottom:8px; display:block;">Genel Skor (Toplam Galibiyet)</span>
+                <div id="globalScoreTags" class="gs-tags">
+                    </div>
+            </div>
+
+            <div class="dj-booth">
+                <div class="dj-title">🎵 DJ, Şarkı İsteği</div>
+                <div class="dj-hint">Vibe: "Energetic rock", "Chill jazz", "80s pop", "Rap"...</div>
+                <div class="dj-input-row">
+                    <input type="text" id="songRequest" class="dj-input" placeholder="Ne dinlemek istersin?">
+                    <button class="dj-btn" onclick="findMusic()">Spotify'da Bul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="winnerOverlay" class="winner-overlay">
+        <div class="winner-card">
+            <div class="gif-container">
+                <img id="winnerGif" src="winner.gif" alt="Winner Animation">
+            </div>
+            <h2 class="winner-title"><span class="winner-name" id="wName">---</span><br>BU OYUNU KAZANDI!</h2>
+            <p class="winner-sub">Yeni raund için tahtayı temizle.</p>
+            <button class="btn-primary" onclick="resetBoard()">TAMAM (RESET)</button>
+        </div>
     </div>
 
     <script>
-      (function () {
-        var targets = ["20", "19", "18", "17", "16", "15", "D", "T", "B", "H"];
+        // -- Game Configuration --
+        const targets = ['20', '19', '18', '17', '16', '15', 'D', 'T', 'B', 'H'];
+        
+        // -- State --
+        let playerCount = 2;
+        let playerNames = [];
+        let scores = []; // 2D Array: [playerIndex][targetIndex] = hits (0-3)
+        let globalWins = {}; // Object: { "Name": count }
+        let gameActive = false;
 
-        var playerCountSelect = document.getElementById("playerCount");
-        var playerInputs = [
-          document.getElementById("player1"),
-          document.getElementById("player2"),
-          document.getElementById("player3"),
-        ];
-
-        var setupScreen = document.getElementById("setupScreen");
-        var gameScreen = document.getElementById("gameScreen");
-
-        var startBtn = document.getElementById("startBtn");
-        var backBtn = document.getElementById("backBtn");
-        var resetMarksBtn = document.getElementById("resetMarksBtn");
-        var newGameBtn = document.getElementById("newGameBtn");
-
-        var scoreTable = document.getElementById("scoreTable");
-        var gameStatusEl = document.getElementById("gameStatus");
-        var scoreSummaryEl = document.getElementById("scoreSummary");
-        var globalSummaryEl = document.getElementById("globalSummary");
-
-        var winnerOverlay = document.getElementById("winnerOverlay");
-        var winnerTextEl = document.getElementById("winnerText");
-        var closeOverlayBtn = document.getElementById("closeOverlayBtn");
-
-        var songRequestInput = document.getElementById("songRequest");
-        var songRequestBtn = document.getElementById("songRequestBtn");
-
-        var gameOver = false;
-        var currentNames = [];
-        var currentPlayerCount = 0;
-
-        // Genel puanlama: isim -> kazandığı oyun sayısı
-        var globalWins = {};
-
-        function nextMark(current) {
-          var order = ["", "/", "x", "ⓧ"];
-          var idx = order.indexOf(current);
-          if (idx === -1 || idx === order.length - 1) {
-            return order[0];
-          }
-          return order[idx + 1];
+        // -- Setup --
+        function initSetup() {
+            setPlayerCount(2);
         }
 
-        function updateGlobalSummary() {
-          var keys = Object.keys(globalWins);
-          if (keys.length === 0) {
-            globalSummaryEl.textContent = "Henüz kimse oyun kazanmadı.";
-            return;
-          }
-          var html = "";
-          keys.forEach(function (name) {
-            html +=
-              '<span><strong>' +
-              name +
-              "</strong>: " +
-              globalWins[name] +
-              " oyun</span>";
-          });
-          globalSummaryEl.innerHTML = html;
+        function setPlayerCount(n) {
+            playerCount = n;
+            // Update buttons
+            const btns = document.querySelectorAll('.p-btn');
+            btns.forEach((b, i) => {
+                if(i + 2 === n) b.classList.add('active');
+                else b.classList.remove('active');
+            });
+
+            // Generate Inputs
+            const container = document.getElementById('nameInputs');
+            container.innerHTML = '';
+            for(let i=0; i<n; i++) {
+                const div = document.createElement('div');
+                div.className = 'input-group';
+                div.innerHTML = `<input type="text" id="pName${i}" placeholder="Oyuncu ${i+1} İsmi" value="Oyuncu ${i+1}">`;
+                container.appendChild(div);
+            }
         }
 
-        function showWinnerOverlay(winnerName) {
-          winnerTextEl.textContent = winnerName + " bu oyunu kazandı 🎯";
-          winnerOverlay.classList.add("active");
+        function startGame() {
+            // Get names
+            playerNames = [];
+            for(let i=0; i<playerCount; i++) {
+                const name = document.getElementById(`pName${i}`).value.trim() || `Oyuncu ${i+1}`;
+                playerNames.push(name);
+                if(!globalWins[name]) globalWins[name] = 0;
+            }
+
+            // Initialize Scores
+            scores = [];
+            for(let i=0; i<playerCount; i++) {
+                scores.push(new Array(targets.length).fill(0));
+            }
+
+            gameActive = true;
+
+            // UI Switch
+            document.getElementById('setupPanel').style.display = 'none';
+            document.getElementById('gameBoard').style.display = 'block';
+            document.getElementById('summaryPanel').style.display = 'block';
+
+            renderBoard();
+            updateSummary();
         }
 
-        function hideWinnerOverlay() {
-          winnerOverlay.classList.remove("active");
-        }
+        // -- Core Logic --
 
-        closeOverlayBtn.addEventListener("click", hideWinnerOverlay);
-        winnerOverlay.addEventListener("click", function (e) {
-          if (e.target === winnerOverlay) hideWinnerOverlay();
-        });
+        function handleHit(playerIdx, targetIdx) {
+            if(!gameActive) return;
 
-        function updateGlobalScore() {
-          var playerCount = currentPlayerCount;
-          var names = currentNames;
-          if (!playerCount || !names || names.length === 0) return;
-
-          var closedCounts = new Array(playerCount);
-          for (var i = 0; i < playerCount; i++) closedCounts[i] = 0;
-
-          var cells = scoreTable.querySelectorAll("td.cell-clickable");
-          for (var j = 0; j < cells.length; j++) {
-            var td = cells[j];
-            var p = parseInt(td.getAttribute("data-player"), 10);
-            if (!isNaN(p) && td.getAttribute("data-count") === "3") {
-              closedCounts[p] += 1;
-            }
-          }
-
-          var summaryText = "";
-          for (var k = 0; k < closedCounts.length; k++) {
-            var count = closedCounts[k];
-            var name = names[k] || "Oyuncu " + (k + 1);
-            summaryText +=
-              '<span><strong>' +
-              name +
-              "</strong>: " +
-              count +
-              "/" +
-              targets.length +
-              "</span>";
-          }
-          scoreSummaryEl.innerHTML =
-            summaryText || "Henüz kapatılmış hedef yok.";
-
-          var winnerIndices = [];
-          for (var w = 0; w < closedCounts.length; w++) {
-            if (closedCounts[w] === targets.length) {
-              winnerIndices.push(w);
-            }
-          }
-
-          if (winnerIndices.length > 0) {
-            if (!gameOver) {
-              if (winnerIndices.length === 1) {
-                var idx = winnerIndices[0];
-                var winnerName = names[idx] || "Oyuncu " + (idx + 1);
-
-                // Genel puanlama
-                globalWins[winnerName] = (globalWins[winnerName] || 0) + 1;
-                updateGlobalSummary();
-
-                showWinnerOverlay(winnerName);
-                gameStatusEl.textContent =
-                  "Oyun bitti · " + winnerName + " tüm hedefleri kapattı";
-                gameStatusEl.className = "game-status win";
-              } else {
-                gameStatusEl.textContent =
-                  "Oyun bitti · birden fazla oyuncu tüm hedefleri kapattı (berabere)";
-                gameStatusEl.className = "game-status tie";
-              }
-            }
-            gameOver = true;
-          } else {
-            if (!gameOver) {
-              gameStatusEl.textContent = "Oyun devam ediyor";
-              gameStatusEl.className = "game-status running";
-            }
-          }
-        }
-
-        function attachCellHandlers(td) {
-          td.addEventListener("click", function () {
-            if (gameOver) return;
-
-            var currentDisplay = td.textContent || "";
-            var next = nextMark(currentDisplay);
-            td.textContent = next;
-
-            if (next === "") {
-              td.setAttribute("data-count", "0");
-            } else if (next === "/") {
-              td.setAttribute("data-count", "1");
-            } else if (next === "x") {
-              td.setAttribute("data-count", "2");
-            } else if (next === "ⓧ") {
-              td.setAttribute("data-count", "3");
-            }
-
-            td.classList.add("tap");
-            setTimeout(function () {
-              td.classList.remove("tap");
-            }, 140);
-
-            updateGlobalScore();
-          });
-        }
-
-        function buildTable() {
-          var playerCount = parseInt(playerCountSelect.value, 10);
-          var names = [];
-
-          for (var i = 0; i < playerCount; i++) {
-            var val = playerInputs[i].value;
-            var name =
-              val && val.trim()
-                ? val.trim()
-                : "Oyuncu " + (i + 1);
-            names.push(name);
-          }
-
-          currentPlayerCount = playerCount;
-          currentNames = names;
-          gameOver = false;
-
-          scoreTable.innerHTML = "";
-
-          var thead = document.createElement("thead");
-          var headRow = document.createElement("tr");
-
-          if (playerCount === 2) {
-            var thP1 = document.createElement("th");
-            thP1.textContent = names[0];
-            headRow.appendChild(thP1);
-
-            var thTarget = document.createElement("th");
-            thTarget.textContent = "Hedef";
-            headRow.appendChild(thTarget);
-
-            var thP2 = document.createElement("th");
-            thP2.textContent = names[1];
-            headRow.appendChild(thP2);
-          } else {
-            var thTargetLeft = document.createElement("th");
-            thTargetLeft.textContent = "Hedef";
-            headRow.appendChild(thTargetLeft);
-
-            for (var p = 0; p < names.length; p++) {
-              var th = document.createElement("th");
-              th.textContent = names[p];
-              headRow.appendChild(th);
-            }
-          }
-
-          thead.appendChild(headRow);
-          scoreTable.appendChild(thead);
-
-          var tbody = document.createElement("tbody");
-
-          for (var t = 0; t < targets.length; t++) {
-            var target = targets[t];
-            var tr = document.createElement("tr");
-
-            if (playerCount === 2) {
-              var tdP1 = document.createElement("td");
-              tdP1.className = "cell-clickable";
-              tdP1.setAttribute("data-count", "0");
-              tdP1.setAttribute("data-player", "0");
-              tdP1.setAttribute("data-target", target);
-              tdP1.textContent = "";
-              attachCellHandlers(tdP1);
-              tr.appendChild(tdP1);
-
-              var tdLabelMid = document.createElement("td");
-              tdLabelMid.textContent = target;
-              tr.appendChild(tdLabelMid);
-
-              var tdP2 = document.createElement("td");
-              tdP2.className = "cell-clickable";
-              tdP2.setAttribute("data-count", "0");
-              tdP2.setAttribute("data-player", "1");
-              tdP2.setAttribute("data-target", target);
-              tdP2.textContent = "";
-              attachCellHandlers(tdP2);
-              tr.appendChild(tdP2);
+            // Cycle 0 -> 1 -> 2 -> 3 -> 0 (Correction allowed)
+            let current = scores[playerIdx][targetIdx];
+            
+            if (current === 3) {
+                 // Optional: Allow cycling back to 0 to fix mistakes? 
+                 // Let's allow it for UX flexibility.
+                 scores[playerIdx][targetIdx] = 0;
             } else {
-              var tdLabel = document.createElement("td");
-              tdLabel.textContent = target;
-              tr.appendChild(tdLabel);
-
-              for (var idx = 0; idx < names.length; idx++) {
-                var td = document.createElement("td");
-                td.className = "cell-clickable";
-                td.setAttribute("data-count", "0");
-                td.setAttribute("data-player", String(idx));
-                td.setAttribute("data-target", target);
-                td.textContent = "";
-                attachCellHandlers(td);
-                tr.appendChild(td);
-              }
+                scores[playerIdx][targetIdx]++;
             }
 
-            tbody.appendChild(tr);
-          }
+            renderBoard();
+            updateSummary();
 
-          scoreTable.appendChild(tbody);
-
-          gameStatusEl.textContent = "Oyun devam ediyor";
-          gameStatusEl.className = "game-status running";
-          scoreSummaryEl.textContent = "Henüz kapatılmış hedef yok.";
-        }
-
-        function showSetup() {
-          setupScreen.classList.add("active");
-          gameScreen.classList.remove("active");
-        }
-
-        function showGame() {
-          setupScreen.classList.remove("active");
-          gameScreen.classList.add("active");
-        }
-
-        function resetMarksOnly() {
-          var cells = scoreTable.querySelectorAll("td.cell-clickable");
-          for (var i = 0; i < cells.length; i++) {
-            var td = cells[i];
-            td.textContent = "";
-            td.setAttribute("data-count", "0");
-            td.classList.remove("tap");
-          }
-          gameOver = false;
-          gameStatusEl.textContent = "Oyun devam ediyor";
-          gameStatusEl.className = "game-status running";
-          scoreSummaryEl.textContent = "Henüz kapatılmış hedef yok.";
-          hideWinnerOverlay();
-        }
-
-        startBtn.addEventListener("click", function () {
-          buildTable();
-          showGame();
-        });
-
-        backBtn.addEventListener("click", function () {
-          showSetup();
-        });
-
-        resetMarksBtn.addEventListener("click", function () {
-          resetMarksOnly();
-        });
-
-        newGameBtn.addEventListener("click", function () {
-          resetMarksOnly();
-          showSetup();
-        });
-
-        // Şarkı iste Spotify entegrasyonu:
-        // basit bir keyword kontrolü ve yoksa genel search
-        function getSpotifyUrlFromDescription(text) {
-          var q = text.toLowerCase();
-
-          // birkaç hazır mood / stil
-          if (q.includes("jazz") || q.includes("caz")) {
-            return "https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt"; // jazz vibes
-          }
-          if (q.includes("80") || q.includes("80ler") || q.includes("80s")) {
-            return "https://open.spotify.com/playlist/37i9dQZF1DX4UtSsGT1Sbe"; // 80s pop
-          }
-          if (q.includes("rock")) {
-            if (q.includes("soft") || q.includes("yumuşak") || q.includes("slow")) {
-              return "https://open.spotify.com/playlist/37i9dQZF1DWXRqgorJj26U"; // soft rock
+            // Check win condition only if hit reached 3
+            if(scores[playerIdx][targetIdx] === 3) {
+                checkWin(playerIdx);
             }
-            return "https://open.spotify.com/playlist/37i9dQZF1DXcF6B6QPhFDv"; // rock classics
-          }
-          if (q.includes("enerjik") || q.includes("energetic") || q.includes("yüksek tempo")) {
-            return "https://open.spotify.com/playlist/37i9dQZF1DX8tZsk68tuDw"; // beast mode
-          }
-          if (q.includes("chill") || q.includes("sakin") || q.includes("lofi") || q.includes("lo fi")) {
-            return "https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6"; // lofi beats
-          }
-          if (q.includes("romantik") || q.includes("love") || q.includes("aşk")) {
-            return "https://open.spotify.com/playlist/37i9dQZF1DXb9LIXaj5WhL"; // love pop
-          }
-
-          // özel bir şey yakalayamazsa Spotify search
-          var encoded = encodeURIComponent(text);
-          return "https://open.spotify.com/search/" + encoded;
         }
 
-        songRequestBtn.addEventListener("click", function () {
-          var text = songRequestInput.value.trim();
-          if (!text) {
-            alert("Önce nasıl bir şarkı istediğini yaz.");
-            return;
-          }
-          var url = getSpotifyUrlFromDescription(text);
-          window.open(url, "_blank");
-        });
-      })();
+        function checkWin(playerIdx) {
+            // Check if this player has all targets at 3
+            const allClosed = scores[playerIdx].every(val => val === 3);
+            
+            if(allClosed) {
+                gameActive = false;
+                globalWins[playerNames[playerIdx]]++;
+                showWinner(playerNames[playerIdx]);
+                updateSummary(); // To show win status
+            }
+        }
+
+        function showWinner(name) {
+            const overlay = document.getElementById('winnerOverlay');
+            document.getElementById('wName').innerText = name;
+            // Reload gif to restart animation
+            const img = document.getElementById('winnerGif');
+            const src = img.src;
+            img.src = '';
+            img.src = src;
+            
+            overlay.classList.add('show');
+        }
+
+        function resetBoard() {
+            // Close overlay
+            document.getElementById('winnerOverlay').classList.remove('show');
+            
+            // Reset scores but keep names and global wins
+            for(let i=0; i<playerCount; i++) {
+                scores[i].fill(0);
+            }
+            gameActive = true;
+            
+            renderBoard();
+            updateSummary();
+        }
+
+        // -- Rendering --
+
+        function renderBoard() {
+            const container = document.getElementById('gridContainer');
+            container.innerHTML = '';
+
+            // Apply Layout Class
+            if(playerCount === 2) {
+                container.className = 'board-grid grid-2p';
+                
+                // Header
+                container.innerHTML += `<div class="header-cell">${playerNames[0]}</div>`;
+                container.innerHTML += `<div class="header-cell">HEDEF</div>`;
+                container.innerHTML += `<div class="header-cell">${playerNames[1]}</div>`;
+
+                // Rows
+                targets.forEach((t, tIdx) => {
+                    // Player 1
+                    container.appendChild(createScoreCell(0, tIdx));
+                    // Target
+                    container.innerHTML += `<div class="target-cell">${t}</div>`;
+                    // Player 2
+                    container.appendChild(createScoreCell(1, tIdx));
+                });
+
+            } else {
+                container.className = 'board-grid grid-3p';
+                
+                // Header
+                container.innerHTML += `<div class="header-cell"></div>`; // Target column header empty
+                playerNames.forEach(name => {
+                    container.innerHTML += `<div class="header-cell">${name}</div>`;
+                });
+
+                // Rows
+                targets.forEach((t, tIdx) => {
+                    // Target
+                    container.innerHTML += `<div class="target-cell">${t}</div>`;
+                    // Players
+                    for(let i=0; i<playerCount; i++) {
+                        container.appendChild(createScoreCell(i, tIdx));
+                    }
+                });
+            }
+        }
+
+        function createScoreCell(pIdx, tIdx) {
+            const score = scores[pIdx][tIdx];
+            const div = document.createElement('div');
+            
+            // Base classes
+            let classes = 'score-cell';
+            if(score === 1) classes += ' hit-1';
+            if(score === 2) classes += ' hit-2';
+            if(score === 3) classes += ' hit-3';
+            
+            div.className = classes;
+            div.onclick = () => handleHit(pIdx, tIdx);
+            
+            // Inner Mark
+            div.innerHTML = '<div class="mark"></div>';
+            
+            return div;
+        }
+
+        function updateSummary() {
+            // Update Status Text
+            const statusEl = document.getElementById('gameStatusText');
+            if(gameActive) {
+                statusEl.innerText = "Oyun devam ediyor...";
+                statusEl.className = "game-status-text status-running";
+            } else {
+                // Find who won
+                const winnerIndex = scores.findIndex(pScores => pScores.every(s => s === 3));
+                if(winnerIndex > -1) {
+                    statusEl.innerText = `${playerNames[winnerIndex]} Kazandı!`;
+                    statusEl.className = "game-status-text status-win";
+                } else {
+                    statusEl.innerText = "Oyun Bitti";
+                }
+            }
+
+            // Update Target Stats
+            const statsContainer = document.getElementById('targetStats');
+            statsContainer.innerHTML = '';
+            playerNames.forEach((name, i) => {
+                const closedCount = scores[i].filter(s => s === 3).length;
+                statsContainer.innerHTML += `
+                    <div class="stat-pill">
+                        <strong>${name}</strong>
+                        <span>${closedCount}/${targets.length}</span>
+                    </div>
+                `;
+            });
+
+            // Update Global Scores
+            const globalContainer = document.getElementById('globalScoreTags');
+            globalContainer.innerHTML = '';
+            Object.keys(globalWins).forEach(name => {
+                if(globalWins[name] > 0) {
+                    globalContainer.innerHTML += `<div class="gs-tag">${name} · ${globalWins[name]} Win</div>`;
+                }
+            });
+        }
+
+        // -- Spotify Logic --
+
+        function openSpotifyPlaylist() {
+            // Generic fallback playlist (e.g., Top Hits or a specific mood)
+            // Using a web player URL for a "Party" vibe
+            window.open('https://open.spotify.com/playlist/37i9dQZF1DXaXB8fQg7xif', '_blank');
+        }
+
+        function findMusic() {
+            const input = document.getElementById('songRequest').value.toLowerCase();
+            if(!input) return;
+
+            let url = '';
+
+            // Simple keyword logic
+            if(input.includes('rock') || input.includes('metal')) {
+                url = 'https://open.spotify.com/playlist/37i9dQZF1DWXRqgorJj26U'; // Rock Classics
+            } else if(input.includes('jazz') || input.includes('chill')) {
+                url = 'https://open.spotify.com/playlist/37i9dQZF1DXbITwg1ZjkYt'; // Jazz Vibes
+            } else if(input.includes('80s') || input.includes('80') || input.includes('pop')) {
+                url = 'https://open.spotify.com/playlist/37i9dQZF1DXb57FjHKp3AC'; // 80s Hits
+            } else if(input.includes('rap') || input.includes('hip hop')) {
+                url = 'https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd'; // RapCaviar
+            } else if(input.includes('tr') || input.includes('türk')) {
+                url = 'https://open.spotify.com/playlist/37i9dQZF1DX1HjC666E81U'; // Türkçe Pop
+            } else {
+                // Fallback to search
+                url = `https://open.spotify.com/search/${encodeURIComponent(input)}`;
+            }
+
+            window.open(url, '_blank');
+        }
+
+        // Initialize
+        initSetup();
+
     </script>
-  </body>
+</body>
 </html>
