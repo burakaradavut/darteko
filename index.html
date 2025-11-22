@@ -3,480 +3,426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dart Cricket Premium</title>
+    <title>Dart Cricket Pro</title>
     <style>
         :root {
-            --bg-deep: #020205;
-            --bg-surface: rgba(22, 22, 30, 0.7);
-            --primary-cyan: #00f3ff;
-            --primary-purple: #bc13fe;
-            --primary-green: #0aff60;
-            --text-bright: #ffffff;
-            --text-dim: #9ba1b0;
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --glass-highlight: rgba(255, 255, 255, 0.07);
-            --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* Premium Palette: Titanium & Deep Sea */
+            --bg-body: #050608;
+            --bg-card: #12141c;
+            --bg-input: #0a0b10;
+            
+            --accent-primary: #3b82f6; /* Modern Blue */
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --accent-success: #10b981; /* Emerald */
+            
+            --text-white: #f3f4f6;
+            --text-gray: #9ca3af;
+            
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", Roboto, sans-serif;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
 
         body {
             margin: 0; padding: 0;
-            background-color: var(--bg-deep);
-            color: var(--text-bright);
-            font-family: var(--font-stack);
+            background-color: var(--bg-body);
+            color: var(--text-white);
+            font-family: var(--font-main);
             overflow-x: hidden; padding-bottom: 80px;
             min-height: 100vh;
         }
 
-        /* --- Premium Background & Atmosphere --- */
+        /* --- Ambient Background (Non-Intrusive) --- */
         body::before {
             content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: 
-                radial-gradient(circle at 20% 30%, rgba(188, 19, 254, 0.25), transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 243, 255, 0.2), transparent 50%),
-                linear-gradient(to bottom, #020205, #0a0a12);
-            z-index: -2; pointer-events: none;
-        }
-        /* Grain Noise Texture */
-        body::after {
-            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-            pointer-events: none; z-index: -1; mix-blend-mode: overlay;
+                radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.15), transparent 60%),
+                radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.05), transparent 40%);
+            z-index: -1; pointer-events: none;
         }
 
-        /* --- Modern Glass Components --- */
-        .glass-panel {
-            background: var(--bg-surface);
-            backdrop-filter: blur(24px) saturate(1.2);
-            -webkit-backdrop-filter: blur(24px) saturate(1.2);
-            border: 1px solid var(--glass-border);
-            box-shadow: 
-                0 20px 40px -10px rgba(0,0,0,0.5),
-                inset 0 1px 2px rgba(255,255,255,0.1);
-            border-radius: 28px;
+        /* --- Layout Container (Fix for click issues) --- */
+        .container { 
+            position: relative; 
+            z-index: 10; /* Ensures content is above background */
+            max-width: 550px; 
+            margin: 90px auto 0; 
+            padding: 0 20px; 
+        }
+
+        /* --- Dynamic Island --- */
+        .island-wrap {
+            position: fixed; top: 16px; left: 0; width: 100%;
+            display: flex; justify-content: center; z-index: 100; pointer-events: none;
+        }
+        .island {
+            pointer-events: auto;
+            background: rgba(20, 20, 22, 0.95);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            width: 92%; max-width: 380px; height: 56px;
+            border-radius: 28px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 8px 0 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.1);
+            transition: transform 0.2s; cursor: pointer;
+        }
+        .island:active { transform: scale(0.97); }
+
+        .island-left { display: flex; align-items: center; gap: 14px; }
+        .eq-bars { display: flex; align-items: flex-end; gap: 3px; height: 16px; }
+        .bar { width: 3px; background: var(--accent-success); border-radius: 4px; animation: eq 1.2s infinite ease-in-out; }
+        .bar:nth-child(2) { animation-delay: 0.2s; height: 60%; }
+        .bar:nth-child(3) { animation-delay: 0.4s; height: 30%; }
+        @keyframes eq { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+
+        .island-info h4 { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: -0.2px; }
+        .island-info p { margin: 0; font-size: 11px; color: var(--text-gray); }
+
+        .island-btn {
+            background: #27272a; color: var(--accent-success);
+            font-size: 11px; font-weight: 700; padding: 10px 16px; border-radius: 20px;
+        }
+
+        /* --- Main UI Cards --- */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
             padding: 24px;
             margin-bottom: 24px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
         }
 
-        /* --- Dynamic Island Header --- */
-        .dynamic-island-wrapper {
-            position: fixed; top: 16px; left: 0; width: 100%;
-            display: flex; justify-content: center; z-index: 100;
-        }
-        .dynamic-island {
-            background: rgba(10, 10, 10, 0.85);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            width: 92%; max-width: 360px; height: 54px;
-            border-radius: 27px; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 10px 0 20px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.5);
-            cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .dynamic-island:active { transform: scale(0.97); }
-        
-        .di-content { display: flex; align-items: center; gap: 14px; }
-        .equalizer { display: flex; align-items: flex-end; gap: 3px; height: 18px; }
-        .bar { width: 3px; background: var(--primary-green); border-radius: 3px; animation: eq 1s infinite ease-in-out; box-shadow: 0 0 8px var(--primary-green); }
-        .bar:nth-child(1) { height: 8px; animation-delay: 0s; }
-        .bar:nth-child(2) { height: 12px; animation-delay: 0.2s; }
-        .bar:nth-child(3) { height: 18px; animation-delay: 0.4s; }
-        @keyframes eq { 0%, 100% { height: 6px; } 50% { height: 18px; } }
-
-        .di-text { display: flex; flex-direction: column; }
-        .di-title { font-size: 13px; font-weight: 700; letter-spacing: -0.3px; }
-        .di-sub { font-size: 11px; color: var(--text-dim); }
-
-        .di-btn {
-            background: rgba(255,255,255,0.08); color: var(--primary-green);
-            font-size: 11px; font-weight: 700; padding: 10px 16px; border-radius: 20px;
-            display: flex; align-items: center; gap: 4px;
-            transition: background 0.2s;
-        }
-        .di-btn:hover { background: rgba(255,255,255,0.15); }
-
-        /* --- Main Layout --- */
-        .container { max-width: 600px; margin: 90px auto 0; padding: 0 20px; }
-
-        header { text-align: center; margin-bottom: 32px; }
+        header { text-align: center; margin-bottom: 30px; }
         h1 {
-            margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -1px;
-            background: linear-gradient(135deg, #fff 30%, var(--primary-cyan));
+            margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.3));
         }
-        .subtitle { font-size: 13px; color: var(--primary-purple); font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-top: 8px; opacity: 0.9; }
+        .subtitle { font-size: 13px; color: var(--accent-primary); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
 
-        /* --- Controls & Inputs --- */
-        .btn-primary {
-            width: 100%; border: none; padding: 16px; border-radius: 18px;
-            background: linear-gradient(135deg, var(--primary-cyan), #0066ff);
-            color: #000; font-weight: 800; font-size: 17px; cursor: pointer;
-            box-shadow: 0 10px 30px -5px rgba(0, 243, 255, 0.5);
-            position: relative; overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
+        /* --- Buttons & Inputs --- */
+        .btn-main {
+            width: 100%; border: none; padding: 16px; border-radius: 16px;
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+            color: white; font-weight: 700; font-size: 16px; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: all 0.2s;
         }
-        .btn-primary::before {
-            content: ''; position: absolute; top:0; left:0; width:100%; height:100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent); opacity: 0.6;
-        }
-        .btn-primary:active { transform: scale(0.98); box-shadow: 0 5px 15px -5px rgba(0, 243, 255, 0.6); }
+        .btn-main:active { transform: scale(0.98); filter: brightness(0.9); }
 
-        .input-group { margin-bottom: 14px; }
+        .input-box { margin-bottom: 12px; }
         input[type="text"] {
-            width: 100%; background: rgba(0,0,0,0.3);
-            border: 1px solid var(--glass-border); border-radius: 14px;
-            padding: 14px 16px; color: #fff; font-size: 16px; outline: none;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        input[type="text"]:focus {
-            border-color: var(--primary-cyan);
-            box-shadow: 0 0 0 3px rgba(0, 243, 255, 0.2), inset 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .mode-select { display: flex; gap: 12px; margin-bottom: 24px; justify-content: center; }
-        .mode-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            color: var(--text-dim); padding: 10px 24px; border-radius: 24px;
-            font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s ease;
-        }
-        .mode-btn.active {
-            background: var(--primary-purple); border-color: transparent; color: #fff;
-            box-shadow: 0 0 25px -5px rgba(188, 19, 254, 0.6);
-        }
-
-        /* --- Game Grid --- */
-        .board-grid { display: grid; gap: 8px; align-items: center; }
-        .grid-2p { grid-template-columns: 1fr 60px 1fr; }
-        .grid-3p { grid-template-columns: 45px 1fr 1fr 1fr; }
-
-        .col-header {
-            text-align: center; font-size: 13px; font-weight: 700; color: var(--primary-cyan);
-            padding-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
-        }
-
-        .target-cell {
-            height: 52px; display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 22px; color: #fff;
-            text-shadow: 0 0 15px rgba(255,255,255,0.5);
-            background: rgba(255,255,255,0.07);
-            border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);
-            box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
-        }
-
-        .score-cell {
-            height: 52px; background: rgba(0,0,0,0.2); border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; position: relative; transition: all 0.15s;
-            border: 1px solid var(--glass-border);
-        }
-        .score-cell:active {
-            background: var(--glass-highlight); transform: scale(0.96);
-            border-color: var(--primary-cyan);
-        }
-
-        /* --- Hit Indicators (Vibrant Glows) --- */
-        .mark { pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        
-        /* Hit 1 */
-        .hit-1 { border-color: rgba(0,243,255,0.5); background: rgba(0,243,255,0.05); box-shadow: inset 0 0 15px rgba(0,243,255,0.1); }
-        .hit-1 .mark {
-            width: 5px; height: 28px; background: var(--primary-cyan); border-radius: 4px;
-            transform: rotate(45deg); box-shadow: 0 0 12px var(--primary-cyan), 0 0 20px var(--primary-cyan);
-        }
-        /* Hit 2 */
-        .hit-2 { border-color: rgba(188,19,254,0.5); background: rgba(188,19,254,0.05); box-shadow: inset 0 0 15px rgba(188,19,254,0.1); }
-        .hit-2 .mark { width: 28px; height: 28px; position: relative; }
-        .hit-2 .mark::before, .hit-2 .mark::after {
-            content: ''; position: absolute; top: 0; left: 11px; width: 5px; height: 28px;
-            background: var(--primary-purple); border-radius: 4px; box-shadow: 0 0 12px var(--primary-purple), 0 0 20px var(--primary-purple);
-        }
-        .hit-2 .mark::before { transform: rotate(45deg); }
-        .hit-2 .mark::after { transform: rotate(-45deg); }
-        /* Hit 3 */
-        .hit-3 { border-color: var(--primary-green); background: rgba(10,255,96,0.1); box-shadow: inset 0 0 20px rgba(10,255,96,0.2); }
-        .hit-3 .mark {
-            width: 32px; height: 32px; border: 3px solid var(--primary-green); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 15px var(--primary-green), inset 0 0 10px var(--primary-green);
-        }
-        .hit-3 .mark::after { content: '×'; color: var(--primary-green); font-size: 24px; font-weight: 900; text-shadow: 0 0 10px var(--primary-green); }
-
-        /* --- Summary & DJ Booth --- */
-        .status-text { font-size: 18px; font-weight: 700; margin: 12px 0; color: var(--text-dim); }
-        .status-text.win {
-            background: linear-gradient(to right, var(--primary-green), var(--primary-cyan));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(10,255,96,0.4));
-        }
-
-        .dj-booth {
-            margin-top: 24px; padding-top: 20px;
-            border-top: 1px solid var(--glass-border);
-        }
-        .dj-row { display: flex; gap: 10px; margin-top: 12px; }
-        .dj-input {
-            flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
-            border-radius: 12px; color: #fff; padding: 12px 16px; font-size: 14px; outline: none;
+            width: 100%; background: var(--bg-input);
+            border: 1px solid #333; border-radius: 12px;
+            padding: 14px; color: #fff; font-size: 16px; outline: none;
             transition: border-color 0.2s;
         }
-        .dj-input:focus { border-color: var(--primary-purple); }
-        
-        .dj-btn-small {
-            background: rgba(255,255,255,0.05); color: var(--primary-green);
-            border: 1px solid var(--glass-border); font-weight: 700;
-            border-radius: 12px; padding: 0 20px; cursor: pointer;
-            min-width: 90px; transition: all 0.2s;
-        }
-        .dj-btn-small:hover { background: rgba(10, 255, 96, 0.1); border-color: var(--primary-green); }
-        .dj-btn-small:active { transform: scale(0.95); }
+        input[type="text"]:focus { border-color: var(--accent-primary); }
 
-        /* --- Winner Overlay --- */
-        .overlay {
+        .tab-group { display: flex; gap: 8px; margin-bottom: 20px; background: var(--bg-input); padding: 4px; border-radius: 14px; }
+        .tab-btn {
+            flex: 1; background: transparent; border: none; color: var(--text-gray);
+            padding: 10px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer;
+        }
+        .tab-btn.active { background: #27272a; color: #fff; shadow: 0 2px 8px rgba(0,0,0,0.2); }
+
+        /* --- Game Grid --- */
+        .board { display: grid; gap: 8px; }
+        .grid-2 { grid-template-columns: 1fr 60px 1fr; }
+        .grid-3 { grid-template-columns: 50px 1fr 1fr 1fr; }
+
+        .th { text-align: center; font-size: 12px; font-weight: 700; color: var(--accent-primary); padding-bottom: 8px; text-transform: uppercase; }
+
+        .target {
+            height: 50px; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 800; color: #fff;
+            background: #1f2937; border-radius: 10px;
+        }
+
+        .cell {
+            height: 50px; background: rgba(255,255,255,0.03); border-radius: 10px;
+            border: 1px solid transparent; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.1s;
+        }
+        .cell:active { background: rgba(255,255,255,0.1); }
+
+        /* --- Marks (Clean & Sharp) --- */
+        .mark { pointer-events: none; }
+        
+        /* Hit 1 - Blue Slash */
+        .h1 { border-color: rgba(59, 130, 246, 0.5); background: rgba(59, 130, 246, 0.1); }
+        .h1 .mark { width: 4px; height: 26px; background: var(--accent-primary); transform: rotate(45deg); border-radius: 2px; }
+        
+        /* Hit 2 - Blue Cross */
+        .h2 { border-color: rgba(59, 130, 246, 0.5); background: rgba(59, 130, 246, 0.1); }
+        .h2 .mark { width: 26px; height: 26px; position: relative; }
+        .h2 .mark::before, .h2 .mark::after { 
+            content:''; position: absolute; top:0; left:11px; width:4px; height:26px; 
+            background: var(--accent-primary); border-radius: 2px; 
+        }
+        .h2 .mark::before { transform: rotate(45deg); }
+        .h2 .mark::after { transform: rotate(-45deg); }
+        
+        /* Hit 3 - Green Circle */
+        .h3 { border-color: var(--accent-success); background: rgba(16, 185, 129, 0.1); }
+        .h3 .mark {
+            width: 28px; height: 28px; border: 2.5px solid var(--accent-success); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .h3 .mark::after { content: '×'; color: var(--accent-success); font-size: 20px; font-weight: 800; margin-top: -2px; }
+
+        /* --- Footer & DJ --- */
+        .status { font-size: 15px; color: var(--text-gray); font-weight: 500; margin: 10px 0; }
+        .status.win { color: var(--accent-success); font-weight: 700; }
+
+        .dj-area { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); }
+        .dj-head { font-size: 13px; font-weight: 700; color: var(--accent-primary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .dj-row { display: flex; gap: 8px; }
+        .dj-btn {
+            background: #27272a; color: var(--accent-success); border: 1px solid #3f3f46;
+            border-radius: 12px; padding: 0 16px; font-weight: 600; cursor: pointer; min-width: 80px;
+        }
+        .dj-btn:active { background: #3f3f46; }
+
+        /* --- Overlay --- */
+        .modal-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(2, 2, 5, 0.85);
-            backdrop-filter: blur(30px) saturate(1.5); -webkit-backdrop-filter: blur(30px) saturate(1.5);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
             z-index: 999; display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
-        .overlay.show { opacity: 1; pointer-events: auto; }
-        .winner-card {
-            width: 90%; max-width: 360px; background: rgba(22, 22, 30, 0.8);
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 32px; padding: 32px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 100px rgba(10,255,96,0.2);
-            transform: scale(0.85) translateY(20px); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            max-height: 95vh; overflow-y: auto;
+        .modal-bg.open { opacity: 1; pointer-events: auto; }
+        .modal {
+            background: #18181b; border: 1px solid #333; width: 90%; max-width: 350px;
+            padding: 24px; border-radius: 24px; text-align: center;
+            transform: scale(0.9); transition: transform 0.3s;
         }
-        .overlay.show .winner-card { transform: scale(1) translateY(0); }
-        
-        #winnerGif {
-            width: 100%; height: auto; max-height: 55vh; object-fit: cover;
-            border-radius: 16px; margin-bottom: 24px;
-            border: 2px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
+        .modal-bg.open .modal { transform: scale(1); }
+        #winGif { width: 100%; height: auto; max-height: 60vh; border-radius: 16px; margin-bottom: 20px; object-fit: contain; background: #000; }
+
     </style>
 </head>
 <body>
 
-    <div class="dynamic-island-wrapper">
-        <div class="dynamic-island" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1EJzGcYgpaOt8a?si=aZcbEZtaQTeDHAgOa5tQWQ&pi=Kq0CRvykRBaqq', '_blank')">
-            <div class="di-content">
-                <div class="equalizer">
+    <div class="island-wrap">
+        <div class="island" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1EJzGcYgpaOt8a?si=aZcbEZtaQTeDHAgOa5tQWQ&pi=Kq0CRvykRBaqq', '_blank')">
+            <div class="island-left">
+                <div class="eq-bars">
                     <div class="bar"></div><div class="bar"></div><div class="bar"></div>
                 </div>
-                <div class="di-text">
-                    <div class="di-title">Dart Zone Mix</div>
-                    <div class="di-sub">Şimdi Çalıyor...</div>
+                <div class="island-info">
+                    <h4>Dart Zone</h4>
+                    <p>Müzik Çalıyor</p>
                 </div>
             </div>
-            <div class="di-btn">Spotify <span style="font-size:14px">▸</span></div>
+            <div class="island-btn">Spotify</div>
         </div>
     </div>
 
     <div class="container">
         <header>
-            <h1>Dart Cricket Live</h1>
-            <div class="subtitle">Premium Night Dashboard</div>
+            <h1>Dart Cricket</h1>
+            <div class="subtitle">Pro Scoreboard</div>
         </header>
 
-        <div id="setupPanel" class="glass-panel">
-            <div class="mode-select">
-                <button class="mode-btn active" id="btn2p" onclick="setMode(2)">2 OYUNCU</button>
-                <button class="mode-btn" id="btn3p" onclick="setMode(3)">3 OYUNCU</button>
+        <div id="setupView" class="card">
+            <div class="tab-group">
+                <button class="tab-btn active" id="btn2" onclick="setMode(2)">2 Oyuncu</button>
+                <button class="tab-btn" id="btn3" onclick="setMode(3)">3 Oyuncu</button>
             </div>
-            <div id="inputsArea"></div>
-            <button class="btn-primary" onclick="startGame()">OYUNU BAŞLAT</button>
+            <div id="inputList"></div>
+            <button class="btn-main" onclick="startGame()">Oyunu Başlat</button>
         </div>
 
-        <div id="gamePanel" style="display:none;">
-            <div id="board" class="glass-panel board-grid"></div>
+        <div id="gameView" style="display:none;">
+            <div id="grid" class="card board"></div>
 
-            <div class="glass-panel">
-                <div style="font-size:11px; color:var(--text-dim); font-weight:700; letter-spacing:1px; text-transform:uppercase;">Oyun Durumu</div>
-                <div id="statusText" class="status-text">Maç bekleniyor...</div>
+            <div class="card">
+                <div style="font-size:11px; text-transform:uppercase; color:#52525b; font-weight:700;">Durum</div>
+                <div id="statusMsg" class="status">Oyun Bekleniyor</div>
                 
-                <div id="globalScoreBoard" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;"></div>
+                <div id="globalStats" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;"></div>
 
-                <div class="dj-booth">
-                    <div style="font-size:14px; color:var(--primary-cyan); font-weight:800; display:flex; align-items:center; gap:8px;">
-                        <span>✨ AI DJ İstek Hattı</span>
+                <div class="dj-area">
+                    <div class="dj-head">
+                        <span>✦ AI DJ</span>
                     </div>
-                    <div style="font-size:11px; color:var(--text-dim); margin:6px 0 12px 0;">Vibe'ı tarif et: "Enerjik rock", "90lar Türkçe Pop", "Duygusal"...</div>
                     <div class="dj-row">
-                        <input type="text" id="musicInput" class="dj-input" placeholder="DJ'e yaz...">
-                        <button id="djBtn" class="dj-btn-small" onclick="smartDJ()">BUL</button>
+                        <input type="text" id="djInput" placeholder="Modunu yaz (örn: 90lar pop, rock)..." style="font-size:14px;">
+                        <button id="djActionBtn" class="dj-btn" onclick="runDJ()">Bul</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="winOverlay" class="overlay">
-        <div class="winner-card">
-            <img id="winnerGif" src="winner.gif" alt="Winner">
-            <h2 style="color:#fff; margin:0; font-size:28px; font-weight:900; letter-spacing:-1px;">TEBRİKLER!</h2>
-            <h3 id="winnerName" style="font-size:20px; background: linear-gradient(to right, var(--primary-green), var(--primary-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin:8px 0 24px 0; text-transform:uppercase; font-weight:800;">---</h3>
-            <button class="btn-primary" onclick="resetGame()">YENİ RAUND BAŞLAT</button>
+    <div id="modalOverlay" class="modal-bg">
+        <div class="modal">
+            <img id="winGif" src="winner.gif" alt="Winner">
+            <h2 style="margin:0; color:#fff;">KAZANDI!</h2>
+            <p id="winName" style="color:var(--accent-primary); font-weight:700; font-size:18px; text-transform:uppercase; margin:5px 0 20px 0;">---</p>
+            <button class="btn-main" onclick="resetRound()">Yeni Oyun</button>
         </div>
     </div>
 
     <script>
-        // CONFIG
-        const targets = ['20','19','18','17','16','15','D','T','B','H'];
-        let playerCount = 2;
-        let players = [];
-        let globalWins = {};
-        let isGameActive = false;
+        // --- DATA & STATE ---
+        const TARGETS = ['20','19','18','17','16','15','D','T','B','H'];
+        let pCount = 2;
+        let players = []; // { name: "", scores: [] }
+        let wins = {}; // { "Name": 5 }
+        let active = false;
 
+        // --- SETUP ---
         function init() { setMode(2); }
 
         function setMode(n) {
-            playerCount = n;
-            document.getElementById('btn2p').className = n===2 ? 'mode-btn active' : 'mode-btn';
-            document.getElementById('btn3p').className = n===3 ? 'mode-btn active' : 'mode-btn';
+            pCount = n;
+            document.getElementById('btn2').className = n===2 ? 'tab-btn active' : 'tab-btn';
+            document.getElementById('btn3').className = n===3 ? 'tab-btn active' : 'tab-btn';
+            
             let html = '';
-            for(let i=0; i<n; i++) html += `<div class="input-group"><input type="text" id="pName${i}" placeholder="Oyuncu ${i+1} İsmi" value="Oyuncu ${i+1}"></div>`;
-            document.getElementById('inputsArea').innerHTML = html;
+            for(let i=0; i<n; i++) {
+                html += `<div class="input-box"><input type="text" id="in${i}" placeholder="Oyuncu ${i+1}" value="Oyuncu ${i+1}"></div>`;
+            }
+            document.getElementById('inputList').innerHTML = html;
         }
 
         function startGame() {
             players = [];
-            for(let i=0; i<playerCount; i++) {
-                const name = document.getElementById(`pName${i}`).value.trim() || `P${i+1}`;
-                players.push({ name: name, scores: new Array(targets.length).fill(0) });
-                if(!globalWins[name]) globalWins[name] = 0;
+            for(let i=0; i<pCount; i++) {
+                let val = document.getElementById(`in${i}`).value.trim() || `P${i+1}`;
+                players.push({ name: val, scores: new Array(TARGETS.length).fill(0) });
+                if(!wins[val]) wins[val] = 0;
             }
-            isGameActive = true;
-            document.getElementById('setupPanel').style.display = 'none';
-            document.getElementById('gamePanel').style.display = 'block';
-            renderBoard();
-            updateStatus();
+            active = true;
+            document.getElementById('setupView').style.display = 'none';
+            document.getElementById('gameView').style.display = 'block';
+            drawBoard();
+            updateUI();
         }
 
-        window.handleHit = function(pIdx, tIdx) {
-            if(!isGameActive) return;
-            let current = players[pIdx].scores[tIdx];
-            if(current >= 3) players[pIdx].scores[tIdx] = 0;
-            else players[pIdx].scores[tIdx]++;
-            renderBoard();
-            if(players[pIdx].scores[tIdx] === 3) checkWin(pIdx);
+        // --- GAMEPLAY ---
+        window.tapCell = function(pIdx, tIdx) {
+            if(!active) return;
+            
+            let sc = players[pIdx].scores[tIdx];
+            // Cycle 0->1->2->3->0
+            players[pIdx].scores[tIdx] = (sc >= 3) ? 0 : sc + 1;
+            
+            drawBoard();
+            
+            // Check win condition (Only if hit 3)
+            if(players[pIdx].scores[tIdx] === 3) checkWinner(pIdx);
         };
 
-        function checkWin(pIdx) {
-            const isWinner = players[pIdx].scores.every(s => s === 3);
-            if(isWinner) {
-                isGameActive = false;
-                globalWins[players[pIdx].name]++;
-                document.getElementById('winnerName').innerText = players[pIdx].name + " KAZANDI!";
-                const img = document.getElementById('winnerGif');
-                const src = img.src; img.src = ''; img.src = src; 
-                document.getElementById('winOverlay').classList.add('show');
-                updateStatus(players[pIdx].name);
+        function checkWinner(pIdx) {
+            // Player wins if ALL scores are 3
+            let isWin = players[pIdx].scores.every(s => s === 3);
+            if(isWin) {
+                active = false;
+                wins[players[pIdx].name]++;
+                
+                document.getElementById('winName').innerText = players[pIdx].name;
+                
+                // Gif Hack
+                let img = document.getElementById('winGif');
+                let src = img.src; img.src = ''; img.src = src;
+
+                document.getElementById('modalOverlay').classList.add('open');
+                updateUI(players[pIdx].name);
             }
         }
 
-        window.resetGame = function() {
+        window.resetRound = function() {
             players.forEach(p => p.scores.fill(0));
-            isGameActive = true;
-            document.getElementById('winOverlay').classList.remove('show');
-            renderBoard();
-            updateStatus();
+            active = true;
+            document.getElementById('modalOverlay').classList.remove('open');
+            drawBoard();
+            updateUI();
         };
 
-        function renderBoard() {
-            const board = document.getElementById('board');
-            let html = '';
-            if(playerCount === 2) {
-                board.className = 'glass-panel board-grid grid-2p';
-                html += `<div class="col-header">${players[0].name}</div><div class="col-header"></div><div class="col-header">${players[1].name}</div>`;
-                targets.forEach((t, tIdx) => {
-                    html += getCellHtml(0, tIdx);
-                    html += `<div class="target-cell">${t}</div>`;
-                    html += getCellHtml(1, tIdx);
+        // --- RENDER ---
+        function drawBoard() {
+            const grid = document.getElementById('grid');
+            let h = '';
+
+            if(pCount === 2) {
+                grid.className = 'card board grid-2';
+                h += `<div class="th">${players[0].name}</div><div class="th"></div><div class="th">${players[1].name}</div>`;
+                TARGETS.forEach((t, i) => {
+                    h += renderCell(0, i);
+                    h += `<div class="target">${t}</div>`;
+                    h += renderCell(1, i);
                 });
             } else {
-                board.className = 'glass-panel board-grid grid-3p';
-                html += `<div class="col-header"></div>`;
-                players.forEach(p => html += `<div class="col-header">${p.name}</div>`);
-                targets.forEach((t, tIdx) => {
-                    html += `<div class="target-cell">${t}</div>`;
-                    players.forEach((p, pIdx) => html += getCellHtml(pIdx, tIdx));
+                grid.className = 'card board grid-3';
+                h += `<div class="th"></div>`;
+                players.forEach(p => h += `<div class="th">${p.name}</div>`);
+                TARGETS.forEach((t, i) => {
+                    h += `<div class="target">${t}</div>`;
+                    players.forEach((p, pIdx) => h += renderCell(pIdx, i));
                 });
             }
-            board.innerHTML = html;
+            grid.innerHTML = h;
         }
 
-        function getCellHtml(pIdx, tIdx) {
-            const score = players[pIdx].scores[tIdx];
-            let cls = 'score-cell';
-            if(score === 1) cls += ' hit-1';
-            if(score === 2) cls += ' hit-2';
-            if(score === 3) cls += ' hit-3';
-            return `<div class="${cls}" onclick="window.handleHit(${pIdx}, ${tIdx})"><div class="mark"></div></div>`;
+        function renderCell(pIdx, tIdx) {
+            let s = players[pIdx].scores[tIdx];
+            let c = 'cell';
+            if(s===1) c += ' h1';
+            if(s===2) c += ' h2';
+            if(s===3) c += ' h3';
+            return `<div class="${c}" onclick="tapCell(${pIdx},${tIdx})"><div class="mark"></div></div>`;
         }
 
-        function updateStatus(winnerName = null) {
-            const st = document.getElementById('statusText');
-            const gs = document.getElementById('globalScoreBoard');
-            if(winnerName) { st.innerHTML = `${winnerName} Kazandı!`; st.className = 'status-text win'; }
-            else if(isGameActive) { st.innerHTML = 'Maç devam ediyor...'; st.className = 'status-text'; }
-            else { st.innerHTML = 'Maç bekleniyor...'; st.className = 'status-text'; }
-            
-            let gsHtml = '';
-            for(let name in globalWins) {
-                if(globalWins[name] > 0) gsHtml += `<div style="background:rgba(188,19,254,0.1); border:1px solid var(--primary-purple); color:var(--primary-purple); font-weight:700; font-size:11px; padding:6px 12px; border-radius:20px; box-shadow:0 0 10px rgba(188,19,254,0.2);">${name}: ${globalWins[name]} Win</div>`;
+        function updateUI(winner = null) {
+            let msg = document.getElementById('statusMsg');
+            if(winner) { msg.innerText = winner + " Kazandı!"; msg.className = 'status win'; }
+            else { msg.innerText = "Maç devam ediyor..."; msg.className = 'status'; }
+
+            let stats = '';
+            for(let k in wins) {
+                if(wins[k]>0) stats += `<div style="font-size:11px; background:#27272a; padding:4px 10px; border-radius:12px; border:1px solid #3f3f46;">${k}: ${wins[k]}</div>`;
             }
-            gs.innerHTML = gsHtml;
+            document.getElementById('globalStats').innerHTML = stats;
         }
 
-        // -- SMART DJ LOGIC (FIXED & RELIABLE) --
-        window.smartDJ = function() {
-            const inputEl = document.getElementById('musicInput');
-            const btnEl = document.getElementById('djBtn');
-            const query = inputEl.value.toLowerCase().trim();
+        // --- DJ LOGIC ---
+        window.runDJ = function() {
+            let inp = document.getElementById('djInput');
+            let btn = document.getElementById('djActionBtn');
+            let val = inp.value.trim().toLowerCase();
 
-            if(!query) return;
+            if(!val) return;
 
-            // 1. Thinking Effect
-            const originalBtnText = btnEl.innerText;
-            btnEl.innerHTML = "Analiz<span style='animation:blink 1s infinite'>...</span>";
-            btnEl.style.color = var(--primary-cyan);
-            inputEl.disabled = true;
+            // UI Feedback
+            let oldTxt = btn.innerText;
+            btn.innerText = "...";
+            inp.disabled = true;
 
             setTimeout(() => {
-                // 2. Keyword Matching
-                let finalQuery = query;
-                // Basit kelime bazlı iyileştirmeler
-                if(query.includes('hareketli') || query.includes('kopmalık')) finalQuery += " party hits";
-                else if(query.includes('sakin') || query.includes('chill')) finalQuery += " chill vibes";
-                else if(query.includes('90lar')) finalQuery += " 90s türkçe pop";
-                else if(query.includes('damar')) finalQuery += " arabesk damar";
+                // Smart Enhance
+                if(val.includes('hareketli') || val.includes('kop')) val += ' party hits';
+                else if(val.includes('sakin') || val.includes('chill')) val += ' chill vibes';
+                else if(val.includes('90lar')) val += ' 90s türkçe pop';
 
-                // 3. Construct Standard Spotify Search URL (Reliable)
-                const spotifyUrl = 'https://open.spotify.com/search/' + encodeURIComponent(finalQuery);
+                // Standard Search URL
+                let url = 'https://open.spotify.com/search/' + encodeURIComponent(val);
+                window.open(url, '_blank');
 
-                // 4. Open
-                window.open(spotifyUrl, '_blank');
+                btn.innerText = "✓";
+                btn.style.color = "#10b981";
                 
-                btnEl.innerText = "✓ BULDUM";
-                btnEl.style.color = var(--primary-green);
-
                 setTimeout(() => {
-                    btnEl.innerText = originalBtnText;
-                    btnEl.style.color = "";
-                    inputEl.disabled = false;
-                    inputEl.value = "";
-                }, 2500);
-
-            }, 1500);
+                    btn.innerText = oldTxt;
+                    btn.style.color = "";
+                    inp.disabled = false;
+                    inp.value = "";
+                }, 2000);
+            }, 1000);
         };
 
         init();
