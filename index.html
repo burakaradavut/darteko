@@ -9,13 +9,14 @@
     />
     <style>
       :root {
-        --bg-main: radial-gradient(circle at 0% -20%, #dbeafe 0, #f5f5f7 40%, #e5e7eb 80%);
-        --card-bg: linear-gradient(145deg, #ffffff 0%, #f9fafb 45%, #eff6ff 100%);
-        --card-border: rgba(15, 23, 42, 0.08);
-        --accent: #007aff;
-        --accent-soft: rgba(0, 122, 255, 0.16);
-        --text-main: #0f172a;
-        --text-muted: #6b7280;
+        --bg-main: radial-gradient(circle at 0% -20%, #020617 0, #020617 40%, #020617 80%);
+        --card-bg: radial-gradient(circle at 0% 0%, #0f172a 0, #020617 55%, #000000 100%);
+        --card-border: rgba(148, 163, 184, 0.4);
+        --accent: #38bdf8;
+        --accent-soft: rgba(56, 189, 248, 0.2);
+        --accent-neon: #22d3ee;
+        --text-main: #e5e7eb;
+        --text-muted: #9ca3af;
       }
 
       * {
@@ -29,7 +30,11 @@
 
       body {
         min-height: 100vh;
-        background: var(--bg-main);
+        background:
+          radial-gradient(circle at 0% 0%, #0f172a 0, transparent 50%),
+          radial-gradient(circle at 100% 0%, #4c1d95 0, transparent 55%),
+          radial-gradient(circle at 50% 100%, #0f766e 0, transparent 60%),
+          #020617;
         color: var(--text-main);
         display: flex;
         justify-content: center;
@@ -47,26 +52,27 @@
       .app-shell::before {
         content: "";
         position: absolute;
-        inset: -40px;
+        inset: -60px;
         pointer-events: none;
-        background-image:
-          radial-gradient(circle at 10% 0%, rgba(129, 140, 248, 0.12) 0, transparent 55%),
-          radial-gradient(circle at 90% 20%, rgba(56, 189, 248, 0.12) 0, transparent 55%),
-          radial-gradient(circle at 0% 100%, rgba(251, 191, 36, 0.12) 0, transparent 55%);
-        mix-blend-mode: soft-light;
-        opacity: 0.9;
+        background:
+          radial-gradient(circle at 10% 0%, rgba(59, 130, 246, 0.35) 0, transparent 55%),
+          radial-gradient(circle at 90% 0%, rgba(236, 72, 153, 0.4) 0, transparent 55%),
+          radial-gradient(circle at 0% 100%, rgba(16, 185, 129, 0.35) 0, transparent 55%);
+        mix-blend-mode: screen;
+        opacity: 0.8;
+        filter: blur(2px);
       }
 
       .grain {
         position: absolute;
         inset: -40px;
         pointer-events: none;
-        opacity: 0.14;
-        mix-blend-mode: multiply;
+        opacity: 0.18;
+        mix-blend-mode: soft-light;
         background-image:
-          linear-gradient(120deg, rgba(148, 163, 184, 0.08) 0.5px, transparent 0.5px),
-          linear-gradient(60deg, rgba(148, 163, 184, 0.08) 0.5px, transparent 0.5px);
-        background-size: 3px 5px, 4px 6px;
+          linear-gradient(120deg, rgba(15, 23, 42, 0.6) 0.5px, transparent 0.5px),
+          linear-gradient(60deg, rgba(148, 163, 184, 0.4) 0.5px, transparent 0.5px);
+        background-size: 3px 5px, 4px 7px;
       }
 
       .status-pill {
@@ -76,22 +82,26 @@
         gap: 6px;
         padding: 4px 10px;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.7);
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
         margin-bottom: 8px;
         font-size: 11px;
         color: var(--text-muted);
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 0.9),
+          0 0 25px rgba(59, 130, 246, 0.5);
       }
 
       .status-dot {
         width: 8px;
         height: 8px;
         border-radius: 999px;
-        background: #34c759;
-        box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.18);
+        background: #22c55e;
+        box-shadow:
+          0 0 0 4px rgba(34, 197, 94, 0.3),
+          0 0 14px rgba(34, 197, 94, 0.9);
       }
 
       .card {
@@ -102,8 +112,9 @@
         padding: 18px 14px 20px;
         border: 1px solid var(--card-border);
         box-shadow:
-          0 18px 40px rgba(15, 23, 42, 0.18),
-          0 0 0 1px rgba(255, 255, 255, 0.8);
+          0 0 0 1px rgba(15, 23, 42, 0.9),
+          0 25px 60px rgba(15, 23, 42, 0.9),
+          0 0 55px rgba(56, 189, 248, 0.28);
         overflow: hidden;
       }
 
@@ -111,10 +122,10 @@
         content: "";
         position: absolute;
         inset: 0;
-        background-image:
-          radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.7) 0, transparent 55%),
-          radial-gradient(circle at 100% 0%, rgba(191, 219, 254, 0.55) 0, transparent 55%);
-        opacity: 0.75;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(148, 163, 184, 0.18) 0, transparent 60%),
+          radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.2) 0, transparent 70%);
+        opacity: 0.7;
         pointer-events: none;
       }
 
@@ -151,10 +162,14 @@
       .badge {
         padding: 4px 10px;
         border-radius: 999px;
-        border: 1px solid rgba(209, 213, 219, 0.95);
+        border: 1px solid rgba(59, 130, 246, 0.8);
         font-size: 11px;
-        color: var(--text-muted);
-        background: linear-gradient(135deg, #f9fafb, #e5f0ff);
+        color: #dbeafe;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.8) 0, rgba(56, 189, 248, 0.3) 45%, transparent 80%);
+        box-shadow:
+          0 0 22px rgba(56, 189, 248, 0.7),
+          0 0 0 1px rgba(15, 23, 42, 0.9);
       }
 
       /* Dynamic Island / Spotify */
@@ -174,13 +189,14 @@
         padding: 8px 14px;
         border-radius: 18px;
         background:
-          radial-gradient(circle at 0% 0%, #020617, #020617 40%, #111827 100%);
-        border: 1px solid rgba(15, 23, 42, 0.85);
+          radial-gradient(circle at 0% 0%, #020617 0, #020617 40%, #111827 100%);
+        border: 1px solid rgba(15, 23, 42, 0.9);
         box-shadow:
-          0 18px 35px rgba(15, 23, 42, 0.6),
-          0 0 0 1px rgba(15, 23, 42, 0.8);
+          0 0 0 1px rgba(15, 23, 42, 0.9),
+          0 18px 40px rgba(15, 23, 42, 0.95),
+          0 0 28px rgba(56, 189, 248, 0.55);
         text-decoration: none;
-        color: #f9fafb;
+        color: #e5e7eb;
         cursor: pointer;
         overflow: hidden;
         position: relative;
@@ -190,13 +206,17 @@
         content: "";
         position: absolute;
         inset: 0;
-        background-image:
-          linear-gradient(120deg, rgba(148, 163, 184, 0.16) 0.5px, transparent 0.5px),
-          linear-gradient(60deg, rgba(15, 23, 42, 0.14) 0.5px, transparent 0.5px);
+        background:
+          linear-gradient(120deg, rgba(148, 163, 184, 0.3) 0.5px, transparent 0.5px),
+          linear-gradient(60deg, rgba(15, 23, 42, 0.4) 0.5px, transparent 0.5px);
         background-size: 4px 6px, 3px 5px;
         mix-blend-mode: soft-light;
-        opacity: 0.5;
+        opacity: 0.6;
         pointer-events: none;
+      }
+
+      .dynamic-island-inner:hover {
+        filter: brightness(1.05);
       }
 
       .di-left {
@@ -227,13 +247,16 @@
         font-size: 11px;
         padding: 4px 10px;
         border-radius: 999px;
-        background: radial-gradient(circle at 0% 0%, #22c55e, #16a34a);
+        background:
+          radial-gradient(circle at 0% 0%, #22c55e 0, #16a34a 60%, #166534 100%);
         color: #ecfdf5;
         font-weight: 600;
         white-space: nowrap;
         position: relative;
         z-index: 1;
-        box-shadow: 0 0 0 1px rgba(6, 95, 39, 0.8);
+        box-shadow:
+          0 0 0 1px rgba(6, 95, 39, 0.9),
+          0 0 18px rgba(34, 197, 94, 0.8);
       }
 
       .di-dot {
@@ -241,7 +264,9 @@
         height: 14px;
         border-radius: 999px;
         background: radial-gradient(circle at 30% 30%, #22c55e, #16a34a);
-        box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.25);
+        box-shadow:
+          0 0 0 4px rgba(22, 163, 74, 0.4),
+          0 0 18px rgba(34, 197, 94, 0.9);
         position: relative;
       }
 
@@ -250,7 +275,7 @@
         position: absolute;
         inset: 3px;
         border-radius: inherit;
-        border: 2px solid rgba(0, 0, 0, 0.43);
+        border: 2px solid rgba(0, 0, 0, 0.7);
       }
 
       .section {
@@ -260,8 +285,12 @@
       .controls {
         padding: 10px;
         border-radius: 16px;
-        background: linear-gradient(135deg, #f9fafb, #eef2ff);
-        border: 1px solid rgba(209, 213, 219, 0.9);
+        background:
+          radial-gradient(circle at 0% 0%, #111827 0, #020617 60%);
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 0.9),
+          0 16px 35px rgba(15, 23, 42, 0.85);
       }
 
       .controls-row {
@@ -279,7 +308,8 @@
 
       select,
       input[type="text"],
-      button {
+      button,
+      textarea {
         border-radius: 12px;
         border: none;
         padding: 9px 11px;
@@ -287,16 +317,26 @@
       }
 
       select,
-      input[type="text"] {
-        background: #ffffff;
-        color: #0f172a;
-        border: 1px solid rgba(209, 213, 219, 0.9);
+      input[type="text"],
+      textarea {
+        background: rgba(15, 23, 42, 0.95);
+        color: #e5e7eb;
+        border: 1px solid rgba(55, 65, 81, 0.9);
         flex: 1;
         min-width: 0;
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 0 20px rgba(56, 189, 248, 0.18);
       }
 
-      input::placeholder {
-        color: #9ca3af;
+      textarea {
+        resize: vertical;
+        min-height: 54px;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #6b7280;
       }
 
       .btn-row {
@@ -306,19 +346,19 @@
         margin-top: 4px;
       }
 
-      /* Mavi butonlar: gradient + grain */
       .btn-primary {
         background:
-          radial-gradient(circle at 0% 0%, #38bdf8, #0f8bff 35%, #007aff 80%),
-          linear-gradient(135deg, #0f8bff, #007aff);
-        color: #ffffff;
+          radial-gradient(circle at 0% 0%, #38bdf8, #0ea5e9 35%, #22d3ee 80%),
+          linear-gradient(135deg, #0ea5e9, #22d3ee);
+        color: #ecfeff;
         font-weight: 600;
         cursor: pointer;
         flex: 1;
         min-width: 130px;
         box-shadow:
-          0 10px 22px rgba(37, 99, 235, 0.45),
-          0 0 0 1px rgba(15, 23, 42, 0.2);
+          0 10px 28px rgba(56, 189, 248, 0.7),
+          0 0 25px rgba(56, 189, 248, 0.9),
+          0 0 0 1px rgba(15, 23, 42, 1);
         position: relative;
         overflow: hidden;
       }
@@ -328,8 +368,8 @@
         position: absolute;
         inset: 0;
         background-image:
-          linear-gradient(120deg, rgba(191, 219, 254, 0.18) 0.5px, transparent 0.5px),
-          linear-gradient(60deg, rgba(15, 23, 42, 0.12) 0.5px, transparent 0.5px);
+          linear-gradient(120deg, rgba(191, 219, 254, 0.45) 0.5px, transparent 0.5px),
+          linear-gradient(60deg, rgba(15, 23, 42, 0.3) 0.5px, transparent 0.5px);
         background-size: 4px 6px, 3px 5px;
         mix-blend-mode: soft-light;
         opacity: 0.8;
@@ -338,15 +378,18 @@
 
       .btn-secondary {
         background:
-          radial-gradient(circle at 0% 0%, #e0f2fe, #eef2ff 40%, #e5e7eb 100%);
-        color: #1e3a8a;
+          radial-gradient(circle at 0% 0%, #1d283a, #020617 50%, #0f172a 100%);
+        color: #e5e7eb;
         cursor: pointer;
         font-size: 12px;
-        border: 1px solid rgba(199, 210, 254, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.7);
         min-width: 110px;
         font-weight: 500;
         position: relative;
         overflow: hidden;
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 0 20px rgba(148, 163, 184, 0.4);
       }
 
       .btn-secondary::after {
@@ -354,17 +397,17 @@
         position: absolute;
         inset: 0;
         background-image:
-          linear-gradient(120deg, rgba(148, 163, 184, 0.12) 0.5px, transparent 0.5px),
-          linear-gradient(60deg, rgba(148, 163, 184, 0.09) 0.5px, transparent 0.5px);
+          linear-gradient(120deg, rgba(148, 163, 184, 0.35) 0.5px, transparent 0.5px),
+          linear-gradient(60deg, rgba(15, 23, 42, 0.35) 0.5px, transparent 0.5px);
         background-size: 4px 6px, 3px 5px;
         mix-blend-mode: soft-light;
-        opacity: 0.7;
+        opacity: 0.75;
         pointer-events: none;
       }
 
       .btn-primary:active,
       .btn-secondary:active {
-        opacity: 0.95;
+        opacity: 0.96;
         box-shadow: none;
         transform: translateY(1px);
       }
@@ -378,14 +421,18 @@
 
       .back-btn {
         border-radius: 999px;
-        border: 1px solid rgba(209, 213, 219, 0.9);
-        background: rgba(248, 250, 252, 0.95);
+        border: 1px solid rgba(55, 65, 81, 0.9);
+        background: rgba(15, 23, 42, 0.95);
         padding: 6px 10px;
         font-size: 12px;
         display: inline-flex;
         align-items: center;
         gap: 6px;
         cursor: pointer;
+        color: #e5e7eb;
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 10px 22px rgba(15, 23, 42, 0.9);
       }
 
       .back-btn span {
@@ -404,8 +451,12 @@
         margin-top: 4px;
         border-radius: 18px;
         overflow: hidden;
-        border: 1px solid rgba(209, 213, 219, 0.9);
-        background: radial-gradient(circle at 0% 0%, #eef2ff, #ffffff);
+        border: 1px solid rgba(75, 85, 99, 0.9);
+        background:
+          radial-gradient(circle at 0% 0%, #020617 0, #020617 50%, #020617 100%);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 18px 40px rgba(15, 23, 42, 0.95);
       }
 
       table {
@@ -415,7 +466,8 @@
       }
 
       thead {
-        background: linear-gradient(90deg, #eef2ff, #e5e7eb);
+        background:
+          linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 64, 175, 0.9));
       }
 
       th,
@@ -423,6 +475,7 @@
         padding: 10px 4px;
         text-align: center;
         font-size: 14px;
+        color: #e5e7eb;
       }
 
       th:first-child,
@@ -433,16 +486,16 @@
 
       th {
         font-weight: 500;
-        border-bottom: 1px solid rgba(209, 213, 219, 0.9);
-        color: var(--text-muted);
+        border-bottom: 1px solid rgba(55, 65, 81, 0.9);
+        color: #cbd5f5;
       }
 
       tbody tr:nth-child(odd) {
-        background: #ffffff;
+        background: rgba(15, 23, 42, 0.95);
       }
 
       tbody tr:nth-child(even) {
-        background: #f9fafb;
+        background: rgba(15, 23, 42, 0.9);
       }
 
       td.cell-clickable {
@@ -456,22 +509,28 @@
       }
 
       td.cell-clickable.tap {
-        background: var(--accent-soft);
-        box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.2);
+        background: rgba(56, 189, 248, 0.15);
+        box-shadow:
+          inset 0 0 0 1px rgba(56, 189, 248, 0.65),
+          0 0 18px rgba(56, 189, 248, 0.8);
       }
 
       .summary {
         margin-top: 10px;
         padding: 10px 11px;
         border-radius: 14px;
-        background: radial-gradient(circle at 0% 0%, #eef2ff, #f9fafb);
-        border: 1px solid rgba(209, 213, 219, 0.9);
+        background:
+          radial-gradient(circle at 0% 0%, rgba(15, 23, 42, 0.95) 0, #020617 60%);
+        border: 1px solid rgba(75, 85, 99, 0.95);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 16px 32px rgba(15, 23, 42, 0.9);
       }
 
       .summary-title {
         font-size: 12px;
         font-weight: 600;
-        color: var(--text-muted);
+        color: var(--accent-neon);
         margin-bottom: 6px;
         letter-spacing: 0.03em;
         text-transform: uppercase;
@@ -494,13 +553,13 @@
       }
 
       .score-summary strong {
-        color: var(--text-main);
+        color: var(--accent-neon);
       }
 
       .round-title {
         font-size: 11px;
         font-weight: 600;
-        color: var(--text-muted);
+        color: #a5b4fc;
         margin-top: 8px;
         margin-bottom: 4px;
         letter-spacing: 0.04em;
@@ -508,11 +567,11 @@
       }
 
       .game-status.win {
-        color: #16a34a;
+        color: #22c55e;
       }
 
       .game-status.tie {
-        color: #0f766e;
+        color: #fbbf24;
       }
 
       .game-status.running {
@@ -523,13 +582,13 @@
       .winner-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(15, 23, 42, 0.55);
+        background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.28), rgba(15, 23, 42, 0.9));
         display: none;
         align-items: center;
         justify-content: center;
         z-index: 50;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
       }
 
       .winner-overlay.active {
@@ -537,14 +596,16 @@
       }
 
       .winner-inner {
-        background: linear-gradient(135deg, #ffffff, #eef2ff);
+        background:
+          radial-gradient(circle at 0% 0%, rgba(15, 23, 42, 1) 0, #020617 60%);
         border-radius: 24px;
         padding: 14px 14px 16px;
         max-width: 320px;
         width: 90%;
         box-shadow:
-          0 25px 40px rgba(15, 23, 42, 0.45),
-          0 0 0 1px rgba(148, 163, 184, 0.6);
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 26px 55px rgba(15, 23, 42, 0.95),
+          0 0 40px rgba(56, 189, 248, 0.8);
         text-align: center;
         position: relative;
         overflow: hidden;
@@ -555,9 +616,9 @@
         position: absolute;
         inset: -40%;
         background:
-          radial-gradient(circle at 0% 0%, rgba(129, 140, 248, 0.25) 0, transparent 50%),
-          radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.25) 0, transparent 55%);
-        mix-blend-mode: soft-light;
+          radial-gradient(circle at 0% 0%, rgba(129, 140, 248, 0.45) 0, transparent 50%),
+          radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.4) 0, transparent 55%);
+        mix-blend-mode: screen;
         opacity: 0.9;
         pointer-events: none;
       }
@@ -568,6 +629,9 @@
         margin-bottom: 10px;
         position: relative;
         z-index: 1;
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 0.9),
+          0 0 30px rgba(56, 189, 248, 0.8);
       }
 
       .winner-gif-wrap img {
@@ -580,14 +644,14 @@
         font-size: 14px;
         font-weight: 600;
         margin-bottom: 8px;
-        color: #111827;
+        color: #e5e7eb;
         position: relative;
         z-index: 1;
       }
 
       .winner-sub {
         font-size: 12px;
-        color: #6b7280;
+        color: #9ca3af;
         margin-bottom: 10px;
         position: relative;
         z-index: 1;
@@ -597,6 +661,35 @@
         font-size: 12px;
         padding: 7px 10px;
         min-width: 0;
+      }
+
+      /* Şarkı istek kutusu */
+      .music-box {
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 14px;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.16), rgba(15, 23, 42, 0.95));
+        border: 1px solid rgba(56, 189, 248, 0.7);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 16px 32px rgba(15, 23, 42, 0.9),
+          0 0 30px rgba(56, 189, 248, 0.6);
+      }
+
+      .music-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent-neon);
+        margin-bottom: 6px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      .music-hint {
+        font-size: 11px;
+        color: #9ca3af;
+        margin-bottom: 6px;
       }
 
       @media (max-width: 430px) {
@@ -641,7 +734,6 @@
       <div id="winnerOverlay" class="winner-overlay">
         <div class="winner-inner">
           <div class="winner-gif-wrap">
-            <!-- BURAYA KENDİ GIF LINKİNİ KOY -->
             <img
               id="winnerGif"
               src="winner.gif"
@@ -658,7 +750,7 @@
 
       <div class="card">
         <div class="card-inner">
-          <!-- Dynamic Island / Spotify -->
+          <!-- Dynamic Island / Spotify playlist -->
           <div class="dynamic-island">
             <a
               class="dynamic-island-inner"
@@ -762,6 +854,24 @@
                 <div id="globalSummary" class="score-summary">
                   Henüz kimse oyun kazanmadı.
                 </div>
+
+                <!-- Şarkı istek kutusu -->
+                <div class="music-box">
+                  <div class="music-title">Şarkı iste</div>
+                  <div class="music-hint">
+                    Nasıl bir şarkı istiyorsun? Mesela
+                    "enerjik rock", "sakin jazz", "80ler pop", "romantik slow" gibi yaz.
+                  </div>
+                  <textarea
+                    id="songRequest"
+                    placeholder="Örnek: enerjik modern rock, kadın vokal, tempo yüksek"
+                  ></textarea>
+                  <div class="btn-row" style="margin-top: 6px;">
+                    <button class="btn-secondary" id="songRequestBtn">
+                      Spotifyda bul
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div class="btn-row" style="margin-top: 8px;">
@@ -805,6 +915,9 @@
         var winnerOverlay = document.getElementById("winnerOverlay");
         var winnerTextEl = document.getElementById("winnerText");
         var closeOverlayBtn = document.getElementById("closeOverlayBtn");
+
+        var songRequestInput = document.getElementById("songRequest");
+        var songRequestBtn = document.getElementById("songRequestBtn");
 
         var gameOver = false;
         var currentNames = [];
@@ -895,17 +1008,15 @@
           }
 
           if (winnerIndices.length > 0) {
-            // Son sayı kapandığı anda ilk defa buraya giriyoruz
             if (!gameOver) {
               if (winnerIndices.length === 1) {
                 var idx = winnerIndices[0];
                 var winnerName = names[idx] || "Oyuncu " + (idx + 1);
 
-                // Genel puanlama: kazanma sayısı +1
+                // Genel puanlama
                 globalWins[winnerName] = (globalWins[winnerName] || 0) + 1;
                 updateGlobalSummary();
 
-                // GIF + status
                 showWinnerOverlay(winnerName);
                 gameStatusEl.textContent =
                   "Oyun bitti · " + winnerName + " tüm hedefleri kapattı";
@@ -1097,7 +1208,49 @@
         newGameBtn.addEventListener("click", function () {
           resetMarksOnly();
           showSetup();
-          // Genel puanlama SİLİNMİYOR, sadece yeni oyun kuruluyor
+        });
+
+        // Şarkı iste Spotify entegrasyonu:
+        // basit bir keyword kontrolü ve yoksa genel search
+        function getSpotifyUrlFromDescription(text) {
+          var q = text.toLowerCase();
+
+          // birkaç hazır mood / stil
+          if (q.includes("jazz") || q.includes("caz")) {
+            return "https://open.spotify.com/playlist/37i9dQZF1DXbITWG1ZJKYt"; // jazz vibes
+          }
+          if (q.includes("80") || q.includes("80ler") || q.includes("80s")) {
+            return "https://open.spotify.com/playlist/37i9dQZF1DX4UtSsGT1Sbe"; // 80s pop
+          }
+          if (q.includes("rock")) {
+            if (q.includes("soft") || q.includes("yumuşak") || q.includes("slow")) {
+              return "https://open.spotify.com/playlist/37i9dQZF1DWXRqgorJj26U"; // soft rock
+            }
+            return "https://open.spotify.com/playlist/37i9dQZF1DXcF6B6QPhFDv"; // rock classics
+          }
+          if (q.includes("enerjik") || q.includes("energetic") || q.includes("yüksek tempo")) {
+            return "https://open.spotify.com/playlist/37i9dQZF1DX8tZsk68tuDw"; // beast mode
+          }
+          if (q.includes("chill") || q.includes("sakin") || q.includes("lofi") || q.includes("lo fi")) {
+            return "https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6"; // lofi beats
+          }
+          if (q.includes("romantik") || q.includes("love") || q.includes("aşk")) {
+            return "https://open.spotify.com/playlist/37i9dQZF1DXb9LIXaj5WhL"; // love pop
+          }
+
+          // özel bir şey yakalayamazsa Spotify search
+          var encoded = encodeURIComponent(text);
+          return "https://open.spotify.com/search/" + encoded;
+        }
+
+        songRequestBtn.addEventListener("click", function () {
+          var text = songRequestInput.value.trim();
+          if (!text) {
+            alert("Önce nasıl bir şarkı istediğini yaz.");
+            return;
+          }
+          var url = getSpotifyUrlFromDescription(text);
+          window.open(url, "_blank");
         });
       })();
     </script>
