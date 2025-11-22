@@ -1,492 +1,1385 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dart Cricket Live Board</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dart Cricket Skor</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <style>
-        :root {
-            --bg-dark: #050508;
-            --bg-panel: #11121a;
-            --neon-cyan: #00f3ff;
-            --neon-purple: #bc13fe;
-            --neon-green: #0aff60;
-            --text-main: #ffffff;
-            --text-muted: #8b9bb4;
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-bg: rgba(20, 20, 30, 0.6);
-            --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      :root {
+        --bg: #020617;
+        --bg-soft: #02081b;
+        --panel: #020817;
+        --panel-soft: #050b1f;
+        --border-soft: rgba(148, 163, 184, 0.45);
+        --accent: #38bdf8;
+        --accent-soft: rgba(56, 189, 248, 0.18);
+        --accent-strong: #22d3ee;
+        --good: #22c55e;
+        --warn: #facc15;
+        --text-main: #e5e7eb;
+        --text-muted: #9ca3af;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, system-ui, "SF Pro Text",
+          "Segoe UI", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 0% 0%, #0b1220 0, transparent 50%),
+          radial-gradient(circle at 100% 0%, #1d1b3a 0, transparent 55%),
+          radial-gradient(circle at 50% 100%, #022c22 0, transparent 60%),
+          var(--bg);
+        color: var(--text-main);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 16px;
+      }
+
+      .app-shell {
+        width: 100%;
+        max-width: 520px;
+        margin-top: 8px;
+        position: relative;
+      }
+
+      .grain {
+        position: absolute;
+        inset: -40px;
+        pointer-events: none;
+        opacity: 0.16;
+        mix-blend-mode: soft-light;
+        background-image:
+          linear-gradient(120deg, rgba(15, 23, 42, 0.5) 0.5px, transparent 0.5px),
+          linear-gradient(60deg, rgba(148, 163, 184, 0.45) 0.5px, transparent 0.5px);
+        background-size: 3px 5px, 4px 7px;
+      }
+
+      .status-pill {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        margin-bottom: 8px;
+        font-size: 11px;
+        color: var(--text-muted);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 10px 25px rgba(15, 23, 42, 0.9),
+          0 0 18px rgba(56, 189, 248, 0.4);
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--good);
+        box-shadow:
+          0 0 0 4px rgba(34, 197, 94, 0.3),
+          0 0 14px rgba(34, 197, 94, 0.9);
+      }
+
+      .card {
+        position: relative;
+        width: 100%;
+        background: radial-gradient(circle at 0% 0%, #02081b 0, #020617 55%, #020617 100%);
+        border-radius: 24px;
+        padding: 18px 14px 20px;
+        border: 1px solid var(--border-soft);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 24px 55px rgba(15, 23, 42, 0.9),
+          0 0 40px rgba(15, 23, 42, 0.7);
+        overflow: hidden;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(148, 163, 184, 0.16) 0, transparent 55%),
+          radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.16) 0, transparent 60%);
+        pointer-events: none;
+        opacity: 0.8;
+      }
+
+      .card-inner {
+        position: relative;
+        z-index: 1;
+      }
+
+      .header {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .title-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .title {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      .subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .badge {
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(59, 130, 246, 0.9);
+        font-size: 11px;
+        color: #dbeafe;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.7) 0, rgba(56, 189, 248, 0.25) 45%, transparent 80%);
+        box-shadow:
+          0 0 18px rgba(56, 189, 248, 0.5),
+          0 0 0 1px rgba(15, 23, 42, 1);
+      }
+
+      /* Dynamic Island / Spotify */
+      .dynamic-island {
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .di-inner {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 380px;
+        padding: 8px 14px;
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at 0% 0%, #020617 0, #020617 40%, #020617 100%);
+        border: 1px solid rgba(15, 23, 42, 1);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 20px 35px rgba(15, 23, 42, 0.95),
+          0 0 24px rgba(56, 189, 248, 0.4);
+        text-decoration: none;
+        color: #e5e7eb;
+        overflow: hidden;
+      }
+
+      .di-inner::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(120deg, rgba(148, 163, 184, 0.3) 0.5px, transparent 0.5px),
+          linear-gradient(60deg, rgba(15, 23, 42, 0.35) 0.5px, transparent 0.5px);
+        background-size: 4px 6px, 3px 5px;
+        mix-blend-mode: soft-light;
+        pointer-events: none;
+        opacity: 0.5;
+      }
+
+      .di-left {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 11px;
+      }
+
+      .di-left-main {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .di-left-sub {
+        color: var(--text-muted);
+      }
+
+      .di-play {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background:
+          radial-gradient(circle at 0% 0%, #22c55e 0, #16a34a 60%, #166534 100%);
+        color: #ecfdf5;
+        font-weight: 600;
+        box-shadow:
+          0 0 0 1px rgba(6, 95, 39, 1),
+          0 0 16px rgba(34, 197, 94, 0.8);
+      }
+
+      .di-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 30%, #22c55e, #16a34a);
+        box-shadow:
+          0 0 0 4px rgba(22, 163, 74, 0.35),
+          0 0 16px rgba(22, 163, 74, 0.9);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .di-bars {
+        display: flex;
+        gap: 2px;
+      }
+
+      .di-bars span {
+        display: block;
+        width: 2px;
+        border-radius: 999px;
+        background: #bbf7d0;
+        animation: bars 0.8s ease-in-out infinite;
+      }
+
+      .di-bars span:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+
+      .di-bars span:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      @keyframes bars {
+        0%,
+        100% {
+          height: 3px;
         }
+        50% {
+          height: 7px;
+        }
+      }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+      .section {
+        margin-top: 10px;
+      }
 
+      .controls {
+        padding: 10px;
+        border-radius: 16px;
+        background:
+          radial-gradient(circle at 0% 0%, #050816 0, #020617 60%);
+        border: 1px solid rgba(75, 85, 99, 0.9);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 16px 32px rgba(15, 23, 42, 0.9);
+      }
+
+      .controls-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      label {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      select,
+      input[type="text"],
+      button,
+      textarea {
+        border-radius: 12px;
+        border: none;
+        padding: 9px 11px;
+        font-size: 13px;
+      }
+
+      select,
+      input[type="text"],
+      textarea {
+        background: rgba(15, 23, 42, 0.96);
+        color: #e5e7eb;
+        border: 1px solid rgba(55, 65, 81, 0.95);
+        flex: 1;
+        min-width: 0;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 54px;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #6b7280;
+      }
+
+      .btn-row {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+        margin-top: 4px;
+      }
+
+      .btn-primary {
+        background:
+          radial-gradient(circle at 0% 0%, #38bdf8, #0ea5e9 35%, #22d3ee 80%);
+        color: #ecfeff;
+        font-weight: 600;
+        cursor: pointer;
+        flex: 1;
+        min-width: 130px;
+        box-shadow:
+          0 10px 26px rgba(56, 189, 248, 0.7),
+          0 0 18px rgba(56, 189, 248, 0.7),
+          0 0 0 1px rgba(15, 23, 42, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(120deg, rgba(191, 219, 254, 0.35) 0.5px, transparent 0.5px),
+          linear-gradient(60deg, rgba(15, 23, 42, 0.3) 0.5px, transparent 0.5px);
+        background-size: 4px 6px, 3px 5px;
+        mix-blend-mode: soft-light;
+        pointer-events: none;
+        opacity: 0.7;
+      }
+
+      .btn-secondary {
+        background:
+          radial-gradient(circle at 0% 0%, #0b1120 0, #020617 60%);
+        color: #e5e7eb;
+        cursor: pointer;
+        font-size: 12px;
+        border: 1px solid rgba(75, 85, 99, 0.9);
+        min-width: 110px;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 10px 22px rgba(15, 23, 42, 0.9);
+      }
+
+      .btn-secondary::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(120deg, rgba(148, 163, 184, 0.18) 0.5px, transparent 0.5px),
+          linear-gradient(60deg, rgba(15, 23, 42, 0.3) 0.5px, transparent 0.5px);
+        background-size: 4px 6px, 3px 5px;
+        mix-blend-mode: soft-light;
+        pointer-events: none;
+        opacity: 0.7;
+      }
+
+      .btn-primary:active,
+      .btn-secondary:active {
+        opacity: 0.97;
+        transform: translateY(1px);
+        box-shadow: none;
+      }
+
+      .top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .back-btn {
+        border-radius: 999px;
+        border: 1px solid rgba(75, 85, 99, 0.95);
+        background: rgba(15, 23, 42, 0.98);
+        padding: 6px 10px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        color: #e5e7eb;
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 10px 22px rgba(15, 23, 42, 0.9);
+      }
+
+      .back-btn span {
+        font-size: 16px;
+      }
+
+      .screen {
+        display: none;
+      }
+
+      .screen.active {
+        display: block;
+      }
+
+      .scoreboard-wrapper {
+        margin-top: 4px;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(55, 65, 81, 0.9);
+        background: radial-gradient(circle at 0% 0%, #020617 0, #020617 50%);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 18px 32px rgba(15, 23, 42, 0.9);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      thead {
+        background: linear-gradient(90deg, #020617, #111827);
+      }
+
+      th,
+      td {
+        padding: 10px 4px;
+        text-align: center;
+        font-size: 14px;
+        color: #e5e7eb;
+      }
+
+      th:first-child,
+      td:first-child {
+        text-align: left;
+        padding-left: 12px;
+      }
+
+      th {
+        font-weight: 500;
+        border-bottom: 1px solid rgba(55, 65, 81, 0.9);
+        color: #cbd5f5;
+      }
+
+      tbody tr:nth-child(odd) {
+        background: rgba(15, 23, 42, 0.96);
+      }
+
+      tbody tr:nth-child(even) {
+        background: rgba(15, 23, 42, 0.9);
+      }
+
+      td.cell-clickable {
+        cursor: pointer;
+        user-select: none;
+        font-size: 18px;
+        min-height: 40px;
+        position: relative;
+        transition: background 0.12s ease-out, transform 0.06s ease-out,
+          box-shadow 0.12s ease-out;
+      }
+
+      td.cell-clickable.tap {
+        background: var(--accent-soft);
+        box-shadow:
+          inset 0 0 0 1px rgba(56, 189, 248, 0.6),
+          0 0 14px rgba(56, 189, 248, 0.7);
+      }
+
+      /* Hit visuals */
+      .mark-wrap {
+        width: 28px;
+        height: 28px;
+        margin: 0 auto;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .hit-0 .mark-wrap {
+        border: 1px dashed rgba(75, 85, 99, 0.6);
+        background: radial-gradient(circle at 30% 0%, rgba(15, 23, 42, 0.9), #020617);
+      }
+
+      .hit-1 .mark-wrap {
+        border: 1px solid rgba(56, 189, 248, 0.5);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 0 12px rgba(56, 189, 248, 0.55);
+        background: radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.18), #020617);
+      }
+
+      .hit-2 .mark-wrap {
+        border: 1px solid rgba(56, 189, 248, 0.75);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 0 18px rgba(56, 189, 248, 0.7);
+        background: radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.25), #020617);
+      }
+
+      .hit-3 .mark-wrap {
+        border: 1px solid rgba(34, 197, 94, 0.9);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 0 22px rgba(34, 197, 94, 0.8);
+        background: radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.25), #020617);
+      }
+
+      .mark-icon {
+        position: relative;
+        width: 16px;
+        height: 16px;
+      }
+
+      .hit-1 .mark-icon::before,
+      .hit-2 .mark-icon::before,
+      .hit-2 .mark-icon::after,
+      .hit-3 .mark-icon::before,
+      .hit-3 .mark-icon::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+      }
+
+      /* Tek çizik */
+      .hit-1 .mark-icon::before {
+        border-bottom: 2px solid rgba(56, 189, 248, 0.9);
+        transform: rotate(-35deg) translateY(2px);
+      }
+
+      /* Çapraz X */
+      .hit-2 .mark-icon::before {
+        border-bottom: 2px solid rgba(56, 189, 248, 0.95);
+        transform: rotate(-40deg) translateY(2px);
+      }
+
+      .hit-2 .mark-icon::after {
+        border-bottom: 2px solid rgba(56, 189, 248, 0.95);
+        transform: rotate(40deg) translateY(2px);
+      }
+
+      /* Kapalı: X + halka */
+      .hit-3 .mark-icon::before {
+        border-bottom: 2px solid rgba(34, 197, 94, 0.95);
+        transform: rotate(-40deg) translateY(2px);
+      }
+
+      .hit-3 .mark-icon::after {
+        border-bottom: 2px solid rgba(34, 197, 94, 0.95);
+        transform: rotate(40deg) translateY(2px);
+      }
+
+      .hit-3 .mark-wrap::after {
+        content: "";
+        position: absolute;
+        inset: 4px;
+        border-radius: 999px;
+        border: 1px solid rgba(187, 247, 208, 0.9);
+        box-shadow: 0 0 10px rgba(187, 247, 208, 0.8);
+      }
+
+      .summary {
+        margin-top: 10px;
+        padding: 10px 11px;
+        border-radius: 14px;
+        background:
+          radial-gradient(circle at 0% 0%, #020617 0, #020617 60%);
+        border: 1px solid rgba(55, 65, 81, 0.95);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 14px 26px rgba(15, 23, 42, 0.9);
+      }
+
+      .summary-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent-strong);
+        margin-bottom: 6px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      .game-status {
+        font-size: 13px;
+        margin-bottom: 6px;
+      }
+
+      .score-summary {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .score-summary span {
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 2px;
+      }
+
+      .score-summary strong {
+        color: var(--accent-strong);
+      }
+
+      .round-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #a5b4fc;
+        margin-top: 8px;
+        margin-bottom: 4px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .game-status.win {
+        color: var(--good);
+      }
+
+      .game-status.tie {
+        color: var(--warn);
+      }
+
+      .game-status.running {
+        color: var(--text-muted);
+      }
+
+      /* Winner overlay */
+      .winner-overlay {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.25), rgba(15, 23, 42, 0.95));
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+
+      .winner-overlay.active {
+        display: flex;
+      }
+
+      .winner-inner {
+        background:
+          radial-gradient(circle at 0% 0%, #020617 0, #020617 60%);
+        border-radius: 24px;
+        padding: 14px 14px 16px;
+        max-width: 320px;
+        width: 90%;
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 26px 48px rgba(15, 23, 42, 0.95),
+          0 0 32px rgba(56, 189, 248, 0.7);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .winner-inner::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(129, 140, 248, 0.35) 0, transparent 50%),
+          radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.3) 0, transparent 55%);
+        mix-blend-mode: screen;
+        opacity: 0.9;
+        pointer-events: none;
+      }
+
+      .winner-gif-wrap {
+        border-radius: 18px;
+        overflow: hidden;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 0 22px rgba(56, 189, 248, 0.7);
+      }
+
+      .winner-gif-wrap img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .winner-text {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #e5e7eb;
+        position: relative;
+        z-index: 1;
+      }
+
+      .winner-sub {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .btn-small {
+        font-size: 12px;
+        padding: 7px 10px;
+        min-width: 0;
+      }
+
+      /* Music box */
+      .music-box {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 14px;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.16), #020617);
+        border: 1px solid rgba(56, 189, 248, 0.7);
+        box-shadow:
+          0 0 0 1px rgba(15, 23, 42, 1),
+          0 12px 26px rgba(15, 23, 42, 0.9),
+          0 0 24px rgba(56, 189, 248, 0.5);
+      }
+
+      .music-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent-strong);
+        margin-bottom: 6px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      .music-hint {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+
+      @media (max-width: 430px) {
         body {
-            margin: 0; padding: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: var(--font-stack);
-            overflow-x: hidden;
-            padding-bottom: 60px;
+          padding: 10px;
         }
 
-        /* Background Effects */
-        body::before {
-            content: ''; position: fixed; top: -20%; left: -20%; width: 140%; height: 140%;
-            background: radial-gradient(circle at 50% 0%, rgba(188, 19, 254, 0.1), transparent 50%);
-            z-index: -1; pointer-events: none;
+        .card {
+          padding: 14px 12px 18px;
         }
 
-        /* Dynamic Island */
-        .dynamic-island-wrapper {
-            position: fixed; top: 12px; left: 0; width: 100%;
-            display: flex; justify-content: center; z-index: 100;
-        }
-        .dynamic-island {
-            background: #000; width: 92%; max-width: 360px; height: 50px;
-            border-radius: 25px; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 8px 0 18px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.15);
-            cursor: pointer; transition: transform 0.2s;
-        }
-        .dynamic-island:active { transform: scale(0.96); }
-        
-        .di-content { display: flex; align-items: center; gap: 12px; }
-        .equalizer { display: flex; align-items: flex-end; gap: 3px; height: 16px; }
-        .bar { width: 3px; background: var(--neon-green); border-radius: 2px; animation: eq 1s infinite ease-in-out; }
-        .bar:nth-child(1) { height: 6px; animation-delay: 0s; }
-        .bar:nth-child(2) { height: 10px; animation-delay: 0.2s; }
-        .bar:nth-child(3) { height: 14px; animation-delay: 0.4s; }
-        @keyframes eq { 0%, 100% { height: 4px; } 50% { height: 16px; } }
-
-        .di-text { display: flex; flex-direction: column; }
-        .di-title { font-size: 12px; font-weight: 700; color: #fff; }
-        .di-sub { font-size: 10px; color: var(--neon-green); }
-
-        .di-btn {
-            background: #1c1c1e; color: #fff; font-size: 11px; font-weight: 600;
-            padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+        th,
+        td {
+          font-size: 13px;
+          padding: 8px 3px;
         }
 
-        /* Main Layout */
-        .container { max-width: 600px; margin: 80px auto 0; padding: 0 16px; }
-
-        header { text-align: center; margin-bottom: 24px; }
-        h1 {
-            margin: 0; font-size: 28px; font-weight: 800;
-            background: linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(165, 180, 252, 0.2);
-        }
-        .subtitle { font-size: 12px; color: var(--neon-cyan); letter-spacing: 1px; text-transform: uppercase; margin-top: 5px; opacity: 0.8; }
-
-        /* Inputs & Buttons */
-        .panel {
-            background: var(--glass-bg); backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border); border-radius: 24px;
-            padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        td.cell-clickable {
+          font-size: 16px;
+          min-height: 34px;
         }
 
-        .btn-primary {
-            width: 100%; background: linear-gradient(135deg, var(--neon-cyan), #0099ff);
-            color: #000; border: none; padding: 14px; border-radius: 14px;
-            font-weight: 700; font-size: 16px; cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
-            transition: filter 0.2s, transform 0.1s;
-        }
-        .btn-primary:active { transform: scale(0.98); filter: brightness(0.9); }
-
-        .input-group { margin-bottom: 12px; }
-        input[type="text"] {
-            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid #333;
-            border-radius: 12px; padding: 12px; color: #fff; font-size: 16px; outline: none;
-        }
-        input[type="text"]:focus { border-color: var(--neon-cyan); }
-
-        .mode-select { display: flex; gap: 10px; margin-bottom: 16px; justify-content: center; }
-        .mode-btn {
-            background: transparent; border: 1px solid #444; color: #888;
-            padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: all 0.3s;
-        }
-        .mode-btn.active {
-            background: var(--neon-purple); border-color: var(--neon-purple); color: #fff;
-            box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
+        .title {
+          font-size: 18px;
         }
 
-        /* Game Grid */
-        .board-grid { display: grid; gap: 6px; align-items: center; }
-        
-        /* 2 Player: P1 | Target | P2 */
-        .grid-2p { grid-template-columns: 1fr 50px 1fr; }
-        /* 3 Player: Target | P1 | P2 | P3 */
-        .grid-3p { grid-template-columns: 40px 1fr 1fr 1fr; }
-
-        .col-header {
-            text-align: center; font-size: 13px; font-weight: 700; color: var(--neon-cyan);
-            padding-bottom: 8px; text-transform: uppercase;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        .di-inner {
+          max-width: 100%;
         }
-
-        /* Hedef Görünürlüğü: Parlak Beyaz ve Neon Efekt */
-        .target-cell {
-            height: 48px; display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 20px; 
-            color: #e0e0e0; /* Parlak beyaz */
-            text-shadow: 0 0 10px rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.06); 
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .score-cell {
-            height: 48px; background: rgba(255,255,255,0.02); border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; position: relative; transition: background 0.1s;
-            border: 1px solid transparent;
-        }
-        .score-cell:active { background: rgba(255,255,255,0.1); transform: scale(0.95); }
-
-        /* Hit Graphics */
-        .mark { pointer-events: none; }
-        
-        /* Hit 1: Slash */
-        .hit-1 { border-color: rgba(0,243,255,0.3); background: rgba(0,243,255,0.05); }
-        .hit-1 .mark {
-            width: 4px; height: 24px; background: var(--neon-cyan);
-            transform: rotate(45deg); border-radius: 2px; box-shadow: 0 0 8px var(--neon-cyan);
-        }
-        
-        /* Hit 2: Cross */
-        .hit-2 { border-color: rgba(188,19,254,0.3); background: rgba(188,19,254,0.05); }
-        .hit-2 .mark { width: 24px; height: 24px; position: relative; }
-        .hit-2 .mark::before, .hit-2 .mark::after {
-            content: ''; position: absolute; top: 0; left: 10px; width: 4px; height: 24px;
-            background: var(--neon-purple); border-radius: 2px; box-shadow: 0 0 8px var(--neon-purple);
-        }
-        .hit-2 .mark::before { transform: rotate(45deg); }
-        .hit-2 .mark::after { transform: rotate(-45deg); }
-
-        /* Hit 3: Closed */
-        .hit-3 { border-color: var(--neon-green); background: rgba(10,255,96,0.1); box-shadow: inset 0 0 10px rgba(10,255,96,0.1); }
-        .hit-3 .mark {
-            width: 26px; height: 26px; border: 2px solid var(--neon-green); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 8px var(--neon-green);
-        }
-        .hit-3 .mark::after {
-            content: '×'; color: var(--neon-green); font-size: 20px; font-weight: 900; line-height: 0;
-        }
-
-        /* Summary & DJ */
-        .status-text { font-size: 16px; font-weight: 600; margin: 10px 0; color: var(--text-muted); }
-        .status-text.win { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
-
-        .dj-booth {
-            margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--glass-border);
-        }
-        .dj-row { display: flex; gap: 8px; margin-top: 8px; }
-        .dj-input {
-            flex: 1; background: #000; border: 1px solid #333; border-radius: 8px;
-            color: #fff; padding: 10px; font-size: 14px;
-        }
-        .dj-btn-small {
-            background: #222; color: var(--neon-green); border: 1px solid #333;
-            border-radius: 8px; padding: 0 16px; cursor: pointer;
-            min-width: 80px;
-            transition: all 0.3s;
-        }
-        .dj-btn-small:active { transform: scale(0.95); }
-
-        /* Winner Overlay */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); backdrop-filter: blur(10px);
-            z-index: 999; display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
-        .overlay.show { opacity: 1; pointer-events: auto; }
-        .winner-card {
-            width: 90%; max-width: 340px; background: #161824;
-            border: 1px solid #333; border-radius: 24px; padding: 24px;
-            text-align: center; box-shadow: 0 0 50px rgba(10,255,96,0.2);
-            transform: scale(0.9); transition: transform 0.3s;
-            max-height: 95vh; overflow-y: auto;
-        }
-        .overlay.show .winner-card { transform: scale(1); }
-        
-        /* GIF AYARI: Dikey uzun, kapsayıcıya sığan, taşmayan */
-        #winnerGif {
-            width: 100%;
-            height: auto;
-            max-height: 60vh; /* Ekran boyunu boğmasın */
-            object-fit: contain;
-            border-radius: 12px; margin-bottom: 16px; border: 2px solid #222;
-            background: #000;
-            display: block;
-        }
-        
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <div class="app-shell">
+      <div class="grain"></div>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span>Dart Cricket · canlı skor tahtası</span>
+      </div>
 
-    <div class="dynamic-island-wrapper">
-        <div class="dynamic-island" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1EJzGcYgpaOt8a?si=aZcbEZtaQTeDHAgOa5tQWQ&pi=Kq0CRvykRBaqq', '_blank')">
-            <div class="di-content">
-                <div class="equalizer">
-                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                </div>
-                <div class="di-text">
-                    <div class="di-title">Dart Zone Mix</div>
-                    <div class="di-sub">Şimdi Çalıyor...</div>
-                </div>
-            </div>
-            <div class="di-btn">Spotify ▸</div>
+      <!-- Winner GIF overlay -->
+      <div id="winnerOverlay" class="winner-overlay">
+        <div class="winner-inner">
+          <div class="winner-gif-wrap">
+            <img
+              id="winnerGif"
+              src="winner.gif"
+              alt="Winner"
+            />
+          </div>
+          <div id="winnerText" class="winner-text"></div>
+          <div class="winner-sub">Yeni tur için işaretleri temizle.</div>
+          <button id="closeOverlayBtn" class="btn-primary btn-small">
+            Tamam
+          </button>
         </div>
-    </div>
+      </div>
 
-    <div class="container">
-        <header>
-            <h1>Dart Cricket Live</h1>
-            <div class="subtitle">Night Mode Dashboard</div>
-        </header>
-
-        <div id="setupPanel" class="panel">
-            <div class="mode-select">
-                <button class="mode-btn active" id="btn2p" onclick="setMode(2)">2 OYUNCU</button>
-                <button class="mode-btn" id="btn3p" onclick="setMode(3)">3 OYUNCU</button>
-            </div>
-            <div id="inputsArea"></div>
-            <button class="btn-primary" onclick="startGame()">BAŞLA</button>
-        </div>
-
-        <div id="gamePanel" style="display:none;">
-            <div id="board" class="panel board-grid"></div>
-
-            <div class="panel">
-                <div style="font-size:10px; color:#666; letter-spacing:1px; text-transform:uppercase;">Oyun Durumu</div>
-                <div id="statusText" class="status-text">Maç devam ediyor...</div>
-                
-                <div id="globalScoreBoard" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;"></div>
-
-                <div class="dj-booth">
-                    <div style="font-size:12px; color:var(--neon-cyan); font-weight:700;">🎵 AI DJ İstek Hattı</div>
-                    <div style="font-size:10px; color:#666; margin:4px 0;">Örn: "Biraz hareketli olsun", "90lar pop", "Damar"...</div>
-                    <div class="dj-row">
-                        <input type="text" id="musicInput" class="dj-input" placeholder="DJ'e tarif et...">
-                        <button id="djBtn" class="dj-btn-small" onclick="smartDJ()">BUL</button>
+      <div class="card">
+        <div class="card-inner">
+          <!-- Dynamic Island / fixed playlist -->
+          <div class="dynamic-island">
+            <a
+              class="di-inner"
+              href="https://open.spotify.com/playlist/37i9dQZF1EJzGcYgpaOt8a?si=4ad5383ce6fd48a0"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div class="di-left">
+                <div class="di-left-main">
+                  <div class="di-dot">
+                    <div class="di-bars">
+                      <span></span><span></span><span></span>
                     </div>
+                  </div>
+                  <span>🎯 Dart mode playlist</span>
                 </div>
-            </div>
-        </div>
-    </div>
+                <div class="di-left-sub">
+                  Sıra beklerken aç, masanın havasını değiştir.
+                </div>
+              </div>
+              <div class="di-play">
+                <span>Spotify’da aç</span>
+                <span>▸</span>
+              </div>
+            </a>
+          </div>
 
-    <div id="winOverlay" class="overlay">
-        <div class="winner-card">
-            <img id="winnerGif" src="winner.gif" alt="Winner">
-            <h2 style="color:#fff; margin:0;">TEBRİKLER!</h2>
-            <h3 id="winnerName" style="color:var(--neon-green); margin:5px 0 20px 0; text-transform:uppercase;">---</h3>
-            <button class="btn-primary" onclick="resetGame()">YENİ RAUND</button>
+          <!-- SETUP -->
+          <div id="setupScreen" class="screen active">
+            <div class="header">
+              <div class="title-wrap">
+                <div class="title">Dart Cricket Skor</div>
+                <div class="subtitle">
+                  Oyuncuları seç ve başlat
+                </div>
+              </div>
+              <div class="badge">3 oyuncuya kadar</div>
+            </div>
+
+            <div class="section controls">
+              <div class="controls-row">
+                <label for="playerCount">Oyuncu sayısı:</label>
+                <select id="playerCount">
+                  <option value="1">1 oyuncu</option>
+                  <option value="2" selected>2 oyuncu</option>
+                  <option value="3">3 oyuncu</option>
+                </select>
+              </div>
+              <div class="controls-row">
+                <input
+                  type="text"
+                  id="player1"
+                  placeholder="Oyuncu 1"
+                  value="Oyuncu 1"
+                />
+              </div>
+              <div class="controls-row">
+                <input
+                  type="text"
+                  id="player2"
+                  placeholder="Oyuncu 2"
+                  value="Oyuncu 2"
+                />
+              </div>
+              <div class="controls-row">
+                <input
+                  type="text"
+                  id="player3"
+                  placeholder="Oyuncu 3"
+                  value="Oyuncu 3"
+                />
+              </div>
+              <div class="btn-row">
+                <button class="btn-primary" id="startBtn">
+                  Oyunu Başlat
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- GAME -->
+          <div id="gameScreen" class="screen">
+            <div class="top-bar">
+              <button id="backBtn" class="back-btn">
+                <span>‹</span> Oyuncular
+              </button>
+              <div class="subtitle">Skor tahtası</div>
+            </div>
+
+            <div class="section">
+              <div class="scoreboard-wrapper">
+                <table id="scoreTable"></table>
+              </div>
+
+              <div class="summary">
+                <div class="summary-title">Anlık Durum</div>
+                <div id="gameStatus" class="game-status running">
+                  Oyun devam ediyor
+                </div>
+                <div id="scoreSummary" class="score-summary">
+                  Henüz kapatılmış hedef yok.
+                </div>
+
+                <div class="round-title">Genel Puanlama</div>
+                <div id="globalSummary" class="score-summary">
+                  Henüz kimse oyun kazanmadı.
+                </div>
+
+                <!-- Music box -->
+                <div class="music-box">
+                  <div class="music-title">Şarkı iste</div>
+                  <div class="music-hint">
+                    Nasıl bir şarkı istiyorsun? Örnek:
+                    “enerjik rock”, “sakin jazz”, “80ler pop”, “romantik slow”…
+                  </div>
+                  <textarea
+                    id="songRequest"
+                    placeholder="Örnek: enerjik modern rock, kadın vokal, tempo yüksek"
+                  ></textarea>
+                  <div class="btn-row" style="margin-top: 6px;">
+                    <button class="btn-secondary" id="songRequestBtn">
+                      Spotify’da şarkı aç
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="btn-row" style="margin-top: 8px;">
+                <button class="btn-secondary" id="resetMarksBtn">
+                  İşaretleri temizle
+                </button>
+                <button class="btn-primary" id="newGameBtn">
+                  Yeni oyun
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <script>
-        // -- CONFIG --
-        const targets = ['20','19','18','17','16','15','D','T','B','H'];
-        let playerCount = 2;
-        let players = [];
-        let globalWins = {};
-        let isGameActive = false;
+      (function () {
+        var targets = ["20", "19", "18", "17", "16", "15", "D", "T", "B", "H"];
 
-        // -- INIT --
-        function init() {
-            setMode(2);
+        var playerCountSelect = document.getElementById("playerCount");
+        var playerInputs = [
+          document.getElementById("player1"),
+          document.getElementById("player2"),
+          document.getElementById("player3"),
+        ];
+
+        var setupScreen = document.getElementById("setupScreen");
+        var gameScreen = document.getElementById("gameScreen");
+
+        var startBtn = document.getElementById("startBtn");
+        var backBtn = document.getElementById("backBtn");
+        var resetMarksBtn = document.getElementById("resetMarksBtn");
+        var newGameBtn = document.getElementById("newGameBtn");
+
+        var scoreTable = document.getElementById("scoreTable");
+        var gameStatusEl = document.getElementById("gameStatus");
+        var scoreSummaryEl = document.getElementById("scoreSummary");
+        var globalSummaryEl = document.getElementById("globalSummary");
+
+        var winnerOverlay = document.getElementById("winnerOverlay");
+        var winnerTextEl = document.getElementById("winnerText");
+        var closeOverlayBtn = document.getElementById("closeOverlayBtn");
+
+        var songRequestInput = document.getElementById("songRequest");
+        var songRequestBtn = document.getElementById("songRequestBtn");
+
+        var gameOver = false;
+        var currentNames = [];
+        var currentPlayerCount = 0;
+
+        // oyuncu adı -> kazandığı oyun sayısı
+        var globalWins = {};
+
+        function updateCellVisual(td) {
+          var count = parseInt(td.getAttribute("data-count") || "0", 10);
+          if (isNaN(count)) count = 0;
+          td.classList.remove("hit-0", "hit-1", "hit-2", "hit-3");
+
+          var wrap = td.querySelector(".mark-wrap");
+          if (!wrap) {
+            td.innerHTML =
+              '<div class="mark-wrap"><div class="mark-icon"></div></div>';
+            wrap = td.querySelector(".mark-wrap");
+          }
+
+          td.classList.add("hit-" + count);
         }
 
-        function setMode(n) {
-            playerCount = n;
-            document.getElementById('btn2p').className = n===2 ? 'mode-btn active' : 'mode-btn';
-            document.getElementById('btn3p').className = n===3 ? 'mode-btn active' : 'mode-btn';
-            
-            let html = '';
-            for(let i=0; i<n; i++) {
-                html += `<div class="input-group"><input type="text" id="pName${i}" placeholder="Oyuncu ${i+1} İsmi" value="Oyuncu ${i+1}"></div>`;
+        function incrementCell(td) {
+          if (gameOver) return;
+          var count = parseInt(td.getAttribute("data-count") || "0", 10);
+          if (isNaN(count)) count = 0;
+          count = (count + 1) % 4;
+          td.setAttribute("data-count", String(count));
+
+          td.classList.add("tap");
+          setTimeout(function () {
+            td.classList.remove("tap");
+          }, 140);
+
+          updateCellVisual(td);
+          updateGlobalScore();
+        }
+
+        function updateGlobalSummary() {
+          var keys = Object.keys(globalWins);
+          if (keys.length === 0) {
+            globalSummaryEl.textContent = "Henüz kimse oyun kazanmadı.";
+            return;
+          }
+          var html = "";
+          keys.forEach(function (name) {
+            html +=
+              '<span><strong>' +
+              name +
+              "</strong>: " +
+              globalWins[name] +
+              " oyun</span>";
+          });
+          globalSummaryEl.innerHTML = html;
+        }
+
+        function showWinnerOverlay(winnerName) {
+          winnerTextEl.textContent = winnerName + " bu oyunu kazandı 🎯";
+          winnerOverlay.classList.add("active");
+        }
+
+        function hideWinnerOverlay() {
+          winnerOverlay.classList.remove("active");
+        }
+
+        closeOverlayBtn.addEventListener("click", hideWinnerOverlay);
+        winnerOverlay.addEventListener("click", function (e) {
+          if (e.target === winnerOverlay) hideWinnerOverlay();
+        });
+
+        function updateGlobalScore() {
+          var playerCount = currentPlayerCount;
+          var names = currentNames;
+          if (!playerCount || !names || names.length === 0) return;
+
+          var closedCounts = new Array(playerCount);
+          for (var i = 0; i < playerCount; i++) closedCounts[i] = 0;
+
+          var cells = scoreTable.querySelectorAll("td.cell-clickable");
+          for (var j = 0; j < cells.length; j++) {
+            var td = cells[j];
+            var p = parseInt(td.getAttribute("data-player"), 10);
+            if (!isNaN(p) && td.getAttribute("data-count") === "3") {
+              closedCounts[p] += 1;
             }
-            document.getElementById('inputsArea').innerHTML = html;
-        }
+          }
 
-        function startGame() {
-            players = [];
-            for(let i=0; i<playerCount; i++) {
-                const name = document.getElementById(`pName${i}`).value.trim() || `P${i+1}`;
-                players.push({ name: name, scores: new Array(targets.length).fill(0) });
-                if(!globalWins[name]) globalWins[name] = 0;
+          var summaryText = "";
+          for (var k = 0; k < closedCounts.length; k++) {
+            var count = closedCounts[k];
+            var name = names[k] || "Oyuncu " + (k + 1);
+            summaryText +=
+              '<span><strong>' +
+              name +
+              "</strong>: " +
+              count +
+              "/" +
+              targets.length +
+              "</span>";
+          }
+          scoreSummaryEl.innerHTML =
+            summaryText || "Henüz kapatılmış hedef yok.";
+
+          var winnerIndices = [];
+          for (var w = 0; w < closedCounts.length; w++) {
+            if (closedCounts[w] === targets.length) {
+              winnerIndices.push(w);
             }
+          }
 
-            isGameActive = true;
-            document.getElementById('setupPanel').style.display = 'none';
-            document.getElementById('gamePanel').style.display = 'block';
-            renderBoard();
-            updateStatus();
-        }
+          if (winnerIndices.length > 0) {
+            if (!gameOver) {
+              if (winnerIndices.length === 1) {
+                var idx = winnerIndices[0];
+                var winnerName = names[idx] || "Oyuncu " + (idx + 1);
 
-        // -- CORE LOGIC --
-        window.handleHit = function(pIdx, tIdx) {
-            if(!isGameActive) return;
-            let current = players[pIdx].scores[tIdx];
-            if(current >= 3) players[pIdx].scores[tIdx] = 0;
-            else players[pIdx].scores[tIdx]++;
-            renderBoard();
-            if(players[pIdx].scores[tIdx] === 3) checkWin(pIdx);
-        };
+                globalWins[winnerName] = (globalWins[winnerName] || 0) + 1;
+                updateGlobalSummary();
 
-        function checkWin(pIdx) {
-            const isWinner = players[pIdx].scores.every(s => s === 3);
-            if(isWinner) {
-                isGameActive = false;
-                globalWins[players[pIdx].name]++;
-                document.getElementById('winnerName').innerText = players[pIdx].name + " KAZANDI!";
-                const img = document.getElementById('winnerGif');
-                const src = img.src; img.src = ''; img.src = src; // Reload GIF
-                document.getElementById('winOverlay').classList.add('show');
-                updateStatus(players[pIdx].name);
+                showWinnerOverlay(winnerName);
+                gameStatusEl.textContent =
+                  "Oyun bitti · " + winnerName + " tüm hedefleri kapattı";
+                gameStatusEl.className = "game-status win";
+              } else {
+                gameStatusEl.textContent =
+                  "Oyun bitti · birden fazla oyuncu tüm hedefleri kapattı (berabere)";
+                gameStatusEl.className = "game-status tie";
+              }
             }
+            gameOver = true;
+          } else {
+            if (!gameOver) {
+              gameStatusEl.textContent = "Oyun devam ediyor";
+              gameStatusEl.className = "game-status running";
+            }
+          }
         }
 
-        window.resetGame = function() {
-            players.forEach(p => p.scores.fill(0));
-            isGameActive = true;
-            document.getElementById('winOverlay').classList.remove('show');
-            renderBoard();
-            updateStatus();
-        };
+        function attachCellHandlers(td) {
+          td.addEventListener("click", function () {
+            incrementCell(td);
+          });
+        }
 
-        // -- RENDER --
-        function renderBoard() {
-            const board = document.getElementById('board');
-            let html = '';
+        function buildTable() {
+          var playerCount = parseInt(playerCountSelect.value, 10);
+          var names = [];
 
-            if(playerCount === 2) {
-                board.className = 'panel board-grid grid-2p';
-                html += `<div class="col-header">${players[0].name}</div>`;
-                html += `<div class="col-header"></div>`; // HDF Yazısı kaldırıldı
-                html += `<div class="col-header">${players[1].name}</div>`;
-                targets.forEach((t, tIdx) => {
-                    html += getCellHtml(0, tIdx);
-                    html += `<div class="target-cell">${t}</div>`;
-                    html += getCellHtml(1, tIdx);
-                });
+          for (var i = 0; i < playerCount; i++) {
+            var val = playerInputs[i].value;
+            var name =
+              val && val.trim()
+                ? val.trim()
+                : "Oyuncu " + (i + 1);
+            names.push(name);
+          }
+
+          currentPlayerCount = playerCount;
+          currentNames = names;
+          gameOver = false;
+
+          scoreTable.innerHTML = "";
+
+          var thead = document.createElement("thead");
+          var headRow = document.createElement("tr");
+
+          if (playerCount === 2) {
+            var thP1 = document.createElement("th");
+            thP1.textContent = names[0];
+            headRow.appendChild(thP1);
+
+            var thTarget = document.createElement("th");
+            thTarget.textContent = "Hedef";
+            headRow.appendChild(thTarget);
+
+            var thP2 = document.createElement("th");
+            thP2.textContent = names[1];
+            headRow.appendChild(thP2);
+          } else {
+            var thTargetLeft = document.createElement("th");
+            thTargetLeft.textContent = "Hedef";
+            headRow.appendChild(thTargetLeft);
+
+            for (var p = 0; p < names.length; p++) {
+              var th = document.createElement("th");
+              th.textContent = names[p];
+              headRow.appendChild(th);
+            }
+          }
+
+          thead.appendChild(headRow);
+          scoreTable.appendChild(thead);
+
+          var tbody = document.createElement("tbody");
+
+          for (var t = 0; t < targets.length; t++) {
+            var target = targets[t];
+            var tr = document.createElement("tr");
+
+            if (playerCount === 2) {
+              var tdP1 = document.createElement("td");
+              tdP1.className = "cell-clickable";
+              tdP1.setAttribute("data-count", "0");
+              tdP1.setAttribute("data-player", "0");
+              tdP1.setAttribute("data-target", target);
+              tdP1.innerHTML =
+                '<div class="mark-wrap"><div class="mark-icon"></div></div>';
+              attachCellHandlers(tdP1);
+              tr.appendChild(tdP1);
+
+              var tdLabelMid = document.createElement("td");
+              tdLabelMid.textContent = target;
+              tr.appendChild(tdLabelMid);
+
+              var tdP2 = document.createElement("td");
+              tdP2.className = "cell-clickable";
+              tdP2.setAttribute("data-count", "0");
+              tdP2.setAttribute("data-player", "1");
+              tdP2.setAttribute("data-target", target);
+              tdP2.innerHTML =
+                '<div class="mark-wrap"><div class="mark-icon"></div></div>';
+              attachCellHandlers(tdP2);
+              tr.appendChild(tdP2);
             } else {
-                board.className = 'panel board-grid grid-3p';
-                html += `<div class="col-header"></div>`;
-                players.forEach(p => html += `<div class="col-header">${p.name}</div>`);
-                targets.forEach((t, tIdx) => {
-                    html += `<div class="target-cell">${t}</div>`;
-                    players.forEach((p, pIdx) => html += getCellHtml(pIdx, tIdx));
-                });
+              var tdLabel = document.createElement("td");
+              tdLabel.textContent = target;
+              tr.appendChild(tdLabel);
+
+              for (var idx = 0; idx < names.length; idx++) {
+                var td = document.createElement("td");
+                td.className = "cell-clickable";
+                td.setAttribute("data-count", "0");
+                td.setAttribute("data-player", String(idx));
+                td.setAttribute("data-target", target);
+                td.innerHTML =
+                  '<div class="mark-wrap"><div class="mark-icon"></div></div>';
+                attachCellHandlers(td);
+                tr.appendChild(td);
+              }
             }
-            board.innerHTML = html;
+
+            tbody.appendChild(tr);
+          }
+
+          scoreTable.appendChild(tbody);
+
+          // başlangıç görselleri
+          var cells = scoreTable.querySelectorAll("td.cell-clickable");
+          for (var c = 0; c < cells.length; c++) {
+            updateCellVisual(cells[c]);
+          }
+
+          gameStatusEl.textContent = "Oyun devam ediyor";
+          gameStatusEl.className = "game-status running";
+          scoreSummaryEl.textContent = "Henüz kapatılmış hedef yok.";
         }
 
-        function getCellHtml(pIdx, tIdx) {
-            const score = players[pIdx].scores[tIdx];
-            let cls = 'score-cell';
-            if(score === 1) cls += ' hit-1';
-            if(score === 2) cls += ' hit-2';
-            if(score === 3) cls += ' hit-3';
-            return `<div class="${cls}" onclick="window.handleHit(${pIdx}, ${tIdx})"><div class="mark"></div></div>`;
+        function showSetup() {
+          setupScreen.classList.add("active");
+          gameScreen.classList.remove("active");
         }
 
-        function updateStatus(winnerName = null) {
-            const st = document.getElementById('statusText');
-            const gs = document.getElementById('globalScoreBoard');
-            
-            if(winnerName) {
-                st.innerHTML = `${winnerName} Kazandı!`;
-                st.className = 'status-text win';
-            } else {
-                st.innerHTML = 'Oyun devam ediyor...';
-                st.className = 'status-text';
-            }
-            let gsHtml = '';
-            for(let name in globalWins) {
-                if(globalWins[name] > 0) gsHtml += `<div style="border:1px solid #bc13fe; color:#bc13fe; font-size:11px; padding:4px 8px; border-radius:6px;">${name}: ${globalWins[name]} Win</div>`;
-            }
-            gs.innerHTML = gsHtml;
+        function showGame() {
+          setupScreen.classList.remove("active");
+          gameScreen.classList.add("active");
         }
 
-        // -- SMART DJ LOGIC (Sanal Zeka) --
-        window.smartDJ = function() {
-            const inputEl = document.getElementById('musicInput');
-            const btnEl = document.getElementById('djBtn');
-            const query = inputEl.value.toLowerCase().trim();
+        function resetMarksOnly() {
+          var cells = scoreTable.querySelectorAll("td.cell-clickable");
+          for (var i = 0; i < cells.length; i++) {
+            var td = cells[i];
+            td.setAttribute("data-count", "0");
+            updateCellVisual(td);
+            td.classList.remove("tap");
+          }
+          gameOver = false;
+          gameStatusEl.textContent = "Oyun devam ediyor";
+          gameStatusEl.className = "game-status running";
+          scoreSummaryEl.textContent = "Henüz kapatılmış hedef yok.";
+          hideWinnerOverlay();
+        }
 
-            if(!query) return;
+        startBtn.addEventListener("click", function () {
+          buildTable();
+          showGame();
+        });
 
-            // 1. Thinking Effect (Yapay zeka düşünüyormuş gibi)
-            const originalBtnText = btnEl.innerText;
-            btnEl.innerText = "Analiz...";
-            btnEl.style.color = "#00f3ff";
-            inputEl.disabled = true;
+        backBtn.addEventListener("click", function () {
+          showSetup();
+        });
 
-            setTimeout(() => {
-                // 2. Keyword Matching (Akıllı eşleşme motoru)
-                let finalQuery = query;
-                let type = "search"; // search vs playlist
+        resetMarksBtn.addEventListener("click", function () {
+          resetMarksOnly();
+        });
 
-                // "Sözlük" Mantığı
-                if(query.includes('hareketli') || query.includes('party') || query.includes('kopmalık')) {
-                    finalQuery = "Party Hits";
-                    type = "playlist";
-                } 
-                else if(query.includes('sakin') || query.includes('chill') || query.includes('yavaş')) {
-                    finalQuery = "Chill Hits";
-                    type = "playlist";
-                }
-                else if(query.includes('90lar') || query.includes('90s') || query.includes('eski')) {
-                    finalQuery = "90s Türkçe Pop";
-                    type = "playlist";
-                }
-                else if(query.includes('damar') || query.includes('arabesk') || query.includes('üzgün')) {
-                    finalQuery = "Arabesk Damar";
-                    type = "playlist";
-                }
-                else if(query.includes('rock') || query.includes('metal')) {
-                    finalQuery = "Rock Classics";
-                    type = "playlist";
-                }
-                else if(query.includes('pop') && query.includes('türkçe')) {
-                    finalQuery = "Türkçe Pop";
-                    type = "playlist";
-                }
+        newGameBtn.addEventListener("click", function () {
+          resetMarksOnly();
+          showSetup();
+        });
 
-                // 3. Construct Smart URL
-                // "playlist" modundaysa, Spotify'da "X playlistleri" şeklinde aratmak daha iyi sonuç verir.
-                let spotifyUrl = "";
-                
-                if(type === "playlist") {
-                    // Kullanıcı vibe tarifi yaptı, direkt o vibe'ın playlistlerine götür
-                    spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(finalQuery)}/playlists`;
-                } else {
-                    // Direkt sanatçı veya şarkı adı olabilir
-                    spotifyUrl = `https://open.spotify.com/search/${encodeURIComponent(finalQuery)}`;
-                }
+        // Mood -> song
+        function getSongUrlFromDescription(text) {
+          var q = text.toLowerCase();
 
-                // 4. Reset UI and Open
-                window.open(spotifyUrl, '_blank');
-                
-                btnEl.innerText = "BULDUM";
-                btnEl.style.color = "#0aff60"; // Yeşil onayı
+          // birkaç sabit şarkı / playlist (keyfî seçimler)
+          if (q.includes("jazz") || q.includes("caz")) {
+            // Chill jazzy track
+            return "https://open.spotify.com/track/1vHYfU52qVHSXBirz0L5QF"; // örnek: Autumn Leaves
+          }
+          if (q.includes("80") || q.includes("80ler") || q.includes("80s")) {
+            return "https://open.spotify.com/track/2dZCPkyLpZyQxf0Q5zZ8BT"; // 80s vibe
+          }
+          if (q.includes("rock")) {
+            if (q.includes("soft") || q.includes("yumuşak") || q.includes("slow")) {
+              return "https://open.spotify.com/track/4g1ZRSobMefqF6nelkgibi"; // soft-ish rock
+            }
+            return "https://open.spotify.com/track/7LRMbd3LEoV5wZJvXT1Lwb"; // more energetic rock
+          }
+          if (
+            q.includes("enerjik") ||
+            q.includes("energetic") ||
+            q.includes("tempo") ||
+            q.includes("hareketli")
+          ) {
+            return "https://open.spotify.com/track/6K4t31amVTZDgR3sKmwUJJ"; // upbeat pop/dance
+          }
+          if (
+            q.includes("chill") ||
+            q.includes("sakin") ||
+            q.includes("lofi") ||
+            q.includes("lo fi")
+          ) {
+            return "https://open.spotify.com/track/2xLMifQCjDGFmkHkpNLD9h"; // lofi-ish
+          }
+          if (
+            q.includes("romantik") ||
+            q.includes("love") ||
+            q.includes("aşk") ||
+            q.includes("slow")
+          ) {
+            return "https://open.spotify.com/track/0HZhYMZOcqbRKpnoM9yomz"; // romantic-ish
+          }
 
-                setTimeout(() => {
-                    btnEl.innerText = originalBtnText;
-                    btnEl.style.color = "";
-                    inputEl.disabled = false;
-                    inputEl.value = ""; // Clear
-                }, 2000);
+          // Hiçbiri tutmazsa arama sayfası aç
+          var encoded = encodeURIComponent(text);
+          return "https://open.spotify.com/search/" + encoded;
+        }
 
-            }, 1200); // 1.2 saniye düşünme payı
-        };
-
-        init();
+        songRequestBtn.addEventListener("click", function () {
+          var text = songRequestInput.value.trim();
+          if (!text) {
+            alert("Önce nasıl bir şarkı istediğini kısaca yaz.");
+            return;
+          }
+          var url = getSongUrlFromDescription(text);
+          window.open(url, "_blank");
+        });
+      })();
     </script>
-</body>
+  </body>
 </html>
