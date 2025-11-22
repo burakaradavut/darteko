@@ -126,10 +126,15 @@
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
+        /* GÜNCELLENDİ: Hedef Görünürlüğü */
         .target-cell {
             height: 48px; display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 18px; color: #444;
-            background: rgba(255,255,255,0.03); border-radius: 8px;
+            font-weight: 800; font-size: 20px; 
+            color: #e0e0e0; /* Parlak beyazımsı renk */
+            text-shadow: 0 0 10px rgba(255,255,255,0.3); /* Hafif parlama */
+            background: rgba(255,255,255,0.06); 
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .score-cell {
@@ -201,10 +206,19 @@
             border: 1px solid #333; border-radius: 24px; padding: 24px;
             text-align: center; box-shadow: 0 0 50px rgba(10,255,96,0.2);
             transform: scale(0.9); transition: transform 0.3s;
+            max-height: 90vh; overflow-y: auto; /* Kartın ekranı taşmasını önle */
         }
         .overlay.show .winner-card { transform: scale(1); }
         
-        #winnerGif { width: 100%; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; border: 2px solid #222; }
+        /* GÜNCELLENDİ: Gif Boyutu Dikey Uzun */
+        #winnerGif {
+            width: 100%;
+            height: auto; /* Kendi yüksekliğini kullansın */
+            max-height: 60vh; /* Ekranın %60'ından uzun olmasın ki buton görünsün */
+            object-fit: contain; /* Görüntüyü kesmeden sığdır */
+            border-radius: 12px; margin-bottom: 16px; border: 2px solid #222;
+            background: #000;
+        }
         
     </style>
 </head>
@@ -365,9 +379,9 @@
             if(playerCount === 2) {
                 // Class for 2 cols
                 board.className = 'panel board-grid grid-2p';
-                // Header
+                // Header (GÜNCELLENDİ: HDF yazısı kaldırıldı)
                 html += `<div class="col-header">${players[0].name}</div>`;
-                html += `<div class="col-header">HDF</div>`;
+                html += `<div class="col-header"></div>`; 
                 html += `<div class="col-header">${players[1].name}</div>`;
                 
                 // Rows
@@ -431,9 +445,6 @@
         window.findMusic = function() {
             const query = document.getElementById('musicInput').value.trim();
             if(!query) return;
-
-            // Doğrudan Spotify Arama URL'sine yönlendiriyoruz
-            // Bu en güvenilir yöntemdir, her tür input için sonuç döndürür.
             const url = `https://open.spotify.com/search/${encodeURIComponent(query)}`;
             window.open(url, '_blank');
         };
